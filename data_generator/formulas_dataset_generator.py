@@ -2,6 +2,8 @@ import numpy as np
 
 import argparse
 
+import vocab as my_vocab
+
 
 def generate_polynomials_dataset(count, float_precision=1e3, max_coef=1e3, max_power=5):
     def build_polynomial(coefs):
@@ -29,17 +31,45 @@ def generate_polynomials_dataset(count, float_precision=1e3, max_coef=1e3, max_p
     return np.apply_along_axis(build_polynomial, 1, coefs)
 
 
-def generate_formulas_dataset(filenames, counts, type='polynomial', **kwargs):
-    if type == 'polynomial':
+def generate_polynomials_dataset_from_vocab(count, vocab=my_vocab.NUMBERS_VOCAB, max_power=10):
+    """
+    :param count: number of formulas to generate
+    :param vocab: list of all available coefficients
+    :return: list of formulas
+    """
+    def build_polynomial(coefs):
+        max_power = len(coefs)
+        # print(coefs)
+        # print(e)
+        if max_power < 0:
+            raise 42
+        zero_term = '%.3f' % coefs[0]
+        if max_power == 0:
+            return zero_term
+        first_term = '%.3f x * +' % coefs[1]
+        if max_power == 1:
+            return '%s %s' % (zero_term, first_term)
+        standard_term_template = '%.3f x %d ^ * +'
+        standard_polynomial_part = ' '.join([standard_term_template % (c, i + 2) for i, c in enumerate(coefs[2:])])
+        return '%s %s %s' % (zero_term, first_term, standard_polynomial_part)
+
+    coefs = np.random.choice(
+        vocab,
+        size=(count, max_power + 1)
+    )
+
+    return np.apply_along_axis(build_polynomial, 1, coefs)
+
+
+def generate_formulas_dataset(filenames, counts, type='polynomial_vocab', **kwargs):
+    if type == 'polynomial_vocab':
         print(np.sum(counts))
-        formulas = generate_polynomials_dataset(np.sum(counts), **kwargs)
+        formulas = generate_polynomials_dataset_from_vocab(np.sum(counts), **kwargs)
     else:
         raise 42
 
     np.random.shuffle(formulas)
     split_formulas = np.split(formulas, [sum(counts[:i]) for i in range(1, len(counts))])
-    print(len(split_formulas[0]))
-    print(len(formulas))
 
     for formulas_bucket, filename in zip(split_formulas, filenames):
         with open(filename, 'w') as f:
