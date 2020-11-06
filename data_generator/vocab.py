@@ -16,5 +16,5 @@ FIRST_50_SQUARES_ = np.sqrt(np.arange(50))
 FIRST_100_SQUARES_ = np.sqrt(np.arange(100))
 
 NUMBERS_VOCAB = np.unique(
-    np.concatenate([FIRST_100_INTS_, FIRST_100_SQUARES_, MAIN_CONSTANTS])
+    np.concatenate([FIRST_10_INTS_, FIRST_10_SQUARES_, MAIN_CONSTANTS])
 )
