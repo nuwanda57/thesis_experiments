@@ -1,13 +1,17 @@
-TEST_FILE = 'formulas_test-2.txt'
-RESULT_FILE = 'test.rec-2.txt'
-ANALYSIS_FILE = 'analysis.txt'
+import argparse
 
 
 def main():
-    with open(TEST_FILE) as test_f, open(RESULT_FILE) as res_f:
+    parser = argparse.ArgumentParser(description='Generate formulas arguments')
+    parser.add_argument('--source-file', type=str, default='results/formulas_test-2.txt',
+                        help='Name of source file')
+    parser.add_argument('--target-file', type=str, default='results/test.rec-2.txt',
+                        help='Name of target file')
+    args = parser.parse_args()
+    with open(args.source_file) as source_f, open(args.target_file) as target_f:
         correct_formulas_count = 0
         incorrect_formulas_count = 0
-        for l1, l2 in zip(test_f, res_f):
+        for l1, l2 in zip(source_f, target_f):
             l1 = l1.strip()
             l2 = l2.strip()
             if l1 == l2:
