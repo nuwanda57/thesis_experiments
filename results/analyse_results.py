@@ -3,9 +3,9 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(description='Generate formulas arguments')
-    parser.add_argument('--source-file', type=str, default='results/formulas_test-2.txt',
+    parser.add_argument('--source-file', type=str, default='formulas_test.txt',
                         help='Name of source file')
-    parser.add_argument('--target-file', type=str, default='results/test.rec-2.txt',
+    parser.add_argument('--target-file', type=str, default='test.rec.rec',
                         help='Name of target file')
     args = parser.parse_args()
     with open(args.source_file) as source_f, open(args.target_file) as target_f:
@@ -18,7 +18,7 @@ def main():
                 correct_formulas_count += 1
             else:
                 incorrect_formulas_count += 1
-                print('Incorrect formula:\n\t%s - real\n\t%s - predicted' % (l1, l2))
+                # print('Incorrect formula:\n\t%s - real\n\t%s - predicted' % (l1, l2))
         print('Correct formulas: %d\nIncorrect formulas: %d\nPercent of incorrect formulas: %.3f' % (
             correct_formulas_count,
             incorrect_formulas_count,

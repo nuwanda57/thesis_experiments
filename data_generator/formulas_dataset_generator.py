@@ -8,8 +8,6 @@ import vocab as my_vocab
 def generate_polynomials_dataset(count, float_precision=1e3, max_coef=1e3, max_power=5):
     def build_polynomial(coefs):
         max_power = len(coefs)
-        # print(coefs)
-        # print(e)
         if max_power < 0:
             raise 42
         zero_term = '<n> %s' % ' '.join(c for c in str(coefs[0]))
@@ -39,8 +37,6 @@ def generate_polynomials_dataset_from_vocab(count, vocab=my_vocab.NUMBERS_VOCAB,
     :return: list of formulas
     """
     def build_polynomial(coefs):
-        # print(coefs)
-        # print(e)
         if len(coefs) <= 0:
             raise 42
         zero_term = '<n> %s' % ' '.join(c for c in str(coefs[0]))
@@ -51,18 +47,20 @@ def generate_polynomials_dataset_from_vocab(count, vocab=my_vocab.NUMBERS_VOCAB,
             return '%s %s' % (zero_term, first_term)
         standard_term_template = '<n> %s x <n> %d ^ * +'
         standard_polynomial_part = ' '.join(
-            [standard_term_template % (' '.join(c for c in str(c)), i + 2) for i, c in enumerate(coefs[2:])])
+            [standard_term_template % (' '.join(c for c in str(coef)), i + 2) for i, coef in enumerate(coefs[2:])])
         return '%s %s %s' % (zero_term, first_term, standard_polynomial_part)
 
     coefs = [np.random.choice(vocab, size=(count // (max_power + 1), power)) for power in range(1, max_power + 2)]
-    # print(coefs)
 
-    return np.concatenate([np.apply_along_axis(build_polynomial, 1, c) for c in coefs])
+    res = []
+    for c in coefs:
+        for i in c:
+            res.append(build_polynomial(i))
+    return res
 
 
 def generate_formulas_dataset(filenames, counts, type='polynomial_vocab', **kwargs):
     if type == 'polynomial_vocab':
-        print(np.sum(counts))
         formulas = generate_polynomials_dataset_from_vocab(np.sum(counts), **kwargs)
     else:
         raise 42
