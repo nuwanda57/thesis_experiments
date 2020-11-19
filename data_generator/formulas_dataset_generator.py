@@ -12,14 +12,15 @@ def generate_polynomials_dataset(count, float_precision=1e3, max_coef=1e3, max_p
         # print(e)
         if max_power < 0:
             raise 42
-        zero_term = '%.3f' % coefs[0]
+        zero_term = '<n> %s' % ' '.join(c for c in str(coefs[0]))
         if max_power == 0:
             return zero_term
-        first_term = '%.3f x * +' % coefs[1]
+        first_term = '<n> %.3f x * +' % ' '.join(c for c in str(coefs[1]))
         if max_power == 1:
             return '%s %s' % (zero_term, first_term)
-        standard_term_template = '%.3f x %d ^ * +'
-        standard_polynomial_part = ' '.join([standard_term_template % (c, i + 2) for i, c in enumerate(coefs[2:])])
+        standard_term_template = '<n> %.3f x <n> %d ^ * +'
+        standard_polynomial_part = ' '.join([
+            standard_term_template % (' '.join(c for c in str(c)), i + 2) for i, c in enumerate(coefs[2:])])
         return '%s %s %s' % (zero_term, first_term, standard_polynomial_part)
 
     coefs = np.random.randint(
@@ -38,27 +39,25 @@ def generate_polynomials_dataset_from_vocab(count, vocab=my_vocab.NUMBERS_VOCAB,
     :return: list of formulas
     """
     def build_polynomial(coefs):
-        max_power = len(coefs)
         # print(coefs)
         # print(e)
-        if max_power < 0:
+        if len(coefs) <= 0:
             raise 42
-        zero_term = '%.3f' % coefs[0]
-        if max_power == 0:
+        zero_term = '<n> %s' % ' '.join(c for c in str(coefs[0]))
+        if len(coefs) == 1:
             return zero_term
-        first_term = '%.3f x * +' % coefs[1]
-        if max_power == 1:
+        first_term = '<n> %s x * +' % ' '.join(c for c in str(coefs[1]))
+        if len(coefs) == 2:
             return '%s %s' % (zero_term, first_term)
-        standard_term_template = '%.3f x %d ^ * +'
-        standard_polynomial_part = ' '.join([standard_term_template % (c, i + 2) for i, c in enumerate(coefs[2:])])
+        standard_term_template = '<n> %s x <n> %d ^ * +'
+        standard_polynomial_part = ' '.join(
+            [standard_term_template % (' '.join(c for c in str(c)), i + 2) for i, c in enumerate(coefs[2:])])
         return '%s %s %s' % (zero_term, first_term, standard_polynomial_part)
 
-    coefs = np.random.choice(
-        vocab,
-        size=(count, max_power + 1)
-    )
+    coefs = [np.random.choice(vocab, size=(count // (max_power + 1), power)) for power in range(1, max_power + 2)]
+    # print(coefs)
 
-    return np.apply_along_axis(build_polynomial, 1, coefs)
+    return np.concatenate([np.apply_along_axis(build_polynomial, 1, c) for c in coefs])
 
 
 def generate_formulas_dataset(filenames, counts, type='polynomial_vocab', **kwargs):
