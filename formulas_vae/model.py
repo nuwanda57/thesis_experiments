@@ -7,6 +7,7 @@ class FormulasVARE(nn.Module):
     def __init__(self, vocab_size, token_embedding_dim, hidden_dim, encoder_layers_cnt, dropout, bidirectional_encoder,
                  decoder_layers_cnt, latent_dim):
         super().__init__()
+        self.token_embedding_dim = token_embedding_dim
         self.embedding = nn.Embedding(vocab_size, token_embedding_dim)
         self.dropout = nn.Dropout(dropout)
         self.bidirectional_encoder = bidirectional_encoder
@@ -39,7 +40,6 @@ class FormulasVARE(nn.Module):
         eps = torch.randn_like(std)
         sample = mu + (eps * std)
         return sample
-
 
     def encode(self, x):
         # x: (formula_len, batch_size)
@@ -79,16 +79,17 @@ class FormulasVARE(nn.Module):
         # z: (batch_size, latent_dim)
         logits = self.decode(x, z)
         # logits: (formula_len, batch_size, vocab_size)
-        return logits, mu, sigma
+        return logits, mu, logsigma, z
 
     def generate_greedy(self, z, max_len):
-        words = []
-        x = torch.zeros(1, len(z), dtype=torch.long, device=z.device).fill_(self.vocab.go)
+        tokens = []
+        # len(z = batch size)
+        x = torch.zeros(1, len(z), dtype=torch.long, device=z.device).fill_(0)
         for i in range(max_len):
-            words.append(input)
-            logits, hidden = self.decode(z, input)
+            logits = self.decode(x, z)
             x = logits.argmax(dim=-1)
-        return torch.cat(words)
+            tokens.append(x)
+        return torch.cat(tokens)
 
     def _reset_parameters(self):
         for p in self.parameters():
