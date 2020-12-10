@@ -13,10 +13,12 @@ def main(predicted_file, target_file):
             else:
                 incorrect_formulas_count += 1
                 # print('Incorrect formula:\n\t%s - real\n\t%s - predicted' % (l1, l2))
-        print('Correct formulas: %d\nIncorrect formulas: %d\nPercent of incorrect formulas: %.3f' % (
+        percent_correct = 100 * correct_formulas_count / (correct_formulas_count + incorrect_formulas_count)
+        print('Correct formulas: %d\nIncorrect formulas: %d\nPercent of correct formulas: %.3f' % (
             correct_formulas_count,
             incorrect_formulas_count,
-            100 * incorrect_formulas_count / (correct_formulas_count + incorrect_formulas_count)))
+            percent_correct))
+        return correct_formulas_count, incorrect_formulas_count, percent_correct
 
 
 if __name__ == '__main__':
