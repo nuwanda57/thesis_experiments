@@ -16,12 +16,16 @@ def main(train_file, val_file, test_file, epochs, log_period, out_file):
     valid_batches, _ = my_utils.build_ordered_batches(val_file, vocab, 256, device)
     test_batches, test_order = my_utils.build_ordered_batches(test_file, vocab, 256, device)
 
-    model = my_model.FormulaVARE(vocab_size=vocab.size(), token_embedding_dim=128, hidden_dim=128,
-                                 encoder_layers_cnt=1, decoder_layers_cnt=1, latent_dim=8)
+    model_params = my_model.ModelParams(
+        vocab=vocab, device=device, vocab_size=vocab.size(), token_embedding_dim=128, hidden_dim=128,
+        encoder_layers_cnt=1, decoder_layers_cnt=1, latent_dim=8
+    )
+    model = my_model.ExtendedFormulaVARE(model_params)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0005, betas=(0.5, 0.999))
     my_train.train(vocab, model, optimizer, train_batches, valid_batches, epochs, log_interval=log_period)
-    my_evaluate.reconstruct(vocab, device, model, test_batches, test_order, 50, out_file)
+    model.reconstruct(test_batches, test_order, 50, out_file)
+    my_evaluate.reconstruct(vocab, device, model, test_batches, test_order, 50, 'test_out')
 
 
 if __name__ == '__main__':
