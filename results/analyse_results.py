@@ -1,14 +1,8 @@
 import argparse
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Generate formulas arguments')
-    parser.add_argument('--source-file', type=str, default='formulas_test.txt',
-                        help='Name of source file')
-    parser.add_argument('--target-file', type=str, default='test.rec.rec',
-                        help='Name of target file')
-    args = parser.parse_args()
-    with open(args.source_file) as source_f, open(args.target_file) as target_f:
+def main(predicted_file, target_file):
+    with open(predicted_file) as source_f, open(target_file) as target_f:
         correct_formulas_count = 0
         incorrect_formulas_count = 0
         for l1, l2 in zip(source_f, target_f):
@@ -26,4 +20,10 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Generate formulas arguments')
+    parser.add_argument('--predicted-file', type=str, default='test.rec',
+                        help='Name of source file')
+    parser.add_argument('--target-file', type=str, default='formulas_test.txt',
+                        help='Name of target file')
+    args = parser.parse_args()
+    main(args.predicted_file, args.target_file)

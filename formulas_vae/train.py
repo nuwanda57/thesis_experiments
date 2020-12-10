@@ -27,7 +27,7 @@ def evaluate(model, batches, vocab):
     return loss, np.mean(rec_losses), np.mean(kl_losses)
 
 
-def train(vocab, model, optimizer, train_batches, valid_batches, epochs, log_interval=100):
+def train(vocab, model, optimizer, train_batches, valid_batches, epochs, log_interval=20):
     for epoch in range(epochs):
         print('Epoch %d' % (epoch + 1))
         kl_losses, rec_losses, losses = [], [], []

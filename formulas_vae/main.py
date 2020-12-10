@@ -7,7 +7,7 @@ from formulas_vae import evaluate as my_evaluate
 import torch
 
 
-def main(train_file, val_file, test_file):
+def main(train_file, val_file, test_file, epochs, log_period):
     vocab = my_vocab.Vocab()
     vocab.build_from_formula_file(train_file)
     vocab.write_vocab_to_file('vocab.txt')
@@ -20,9 +20,9 @@ def main(train_file, val_file, test_file):
                                  encoder_layers_cnt=1, decoder_layers_cnt=1, latent_dim=8)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.0005, betas=(0.5, 0.999))
-    my_train.train(vocab, model, optimizer, train_batches, valid_batches, 50, log_interval=100)
+    my_train.train(vocab, model, optimizer, train_batches, valid_batches, epochs, log_interval=log_period)
     my_evaluate.reconstruct(vocab, device, model, test_batches, test_order, 50)
 
 
 if __name__ == '__main__':
-    main('formulas_train_5_10.txt', 'formulas_val_5_10.txt', 'formulas_test_5_10.txt')
+    main('formulas_train_5_10.txt', 'formulas_val_5_10.txt', 'formulas_test_5_10.txt', 100, 20)
