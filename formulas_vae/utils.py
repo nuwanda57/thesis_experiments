@@ -27,3 +27,64 @@ def build_ordered_batches(formula_file, vocab, batch_size, device):
         batch_formulas = sorted_formulas[batch_ind * batch_size:(batch_ind + 1) * batch_size]
         batches.append(build_single_batch_from_formulas_list(batch_formulas, vocab, device))
     return batches, order
+
+
+def polish_to_standard(old_formula):
+    if len(old_formula) == 0:
+        raise 42
+    if len(old_formula) == 1:
+        return old_formula[0]
+    symbol_count = 0
+    num_count = 0
+    reversed_f = old_formula[::-1][1:]
+    i = 0
+    for item in reversed_f:
+        i += 1
+        if item in ['^', '*', '+']:
+            symbol_count += 1
+        else:
+            num_count += 1
+        if symbol_count + 1 == num_count:
+            break
+    right = reversed_f[:i][::-1]
+    left = reversed_f[i:][::-1]
+    return polish_to_standard(left) + old_formula[-1] + polish_to_standard(right)
+
+
+def polynom_to_normal_formula(polynom):
+    polynom = polynom.split()
+    formula = []
+    number = None
+    for s in polynom:
+        if s == '<n>':
+            if number is not None:
+                formula.append(str(number))
+            number = 0
+        elif s in ['x', '^', '*', '+']:
+            if number is not None:
+                formula.append(str(number))
+            number = None
+            formula.append(s)
+        else:
+            if number is None:
+                number = 0
+            number *= 10
+            number += int(s)
+    if number is not None:
+        formula.append(str(number))
+    return polish_to_standard(formula)
+
+
+def eval_polynom(polynom, x):
+    formula = polynom_to_normal_formula(polynom)
+    x_count = formula.count('x')
+    formula = formula.replace('x', '%d')
+    formula = formula.replace('^', '**')
+    formula = formula % ((x,) * x_count)
+    return eval(formula)
+
+
+
+if __name__ == '__main__':
+    print(polynom_to_normal_formula('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +'))
+    print(eval_polynom('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +', 5))
