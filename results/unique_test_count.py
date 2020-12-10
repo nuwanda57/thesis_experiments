@@ -1,7 +1,7 @@
 def main():
-    with open('./../formulas_test_7_10.txt') as f:
+    with open('./../formulas_test_5_10.txt') as f:
         lines_test = f.readlines()
-    with open('./../formulas_train_7_10.txt') as f:
+    with open('./../formulas_train_5_10.txt') as f:
         lines_train = set(f.readlines())
 
     ans = 0

@@ -61,7 +61,12 @@ def generate_polynomials_dataset_from_vocab(count, vocab=my_vocab.NUMBERS_VOCAB,
 
 def generate_formulas_dataset(filenames, counts, type='polynomial_vocab', **kwargs):
     if type == 'polynomial_vocab':
-        formulas = generate_polynomials_dataset_from_vocab(np.sum(counts), **kwargs)
+        while True:
+            formulas = generate_polynomials_dataset_from_vocab(np.sum(counts) * 10, **kwargs)
+            formulas = np.unique(formulas)
+            if len(formulas) >= np.sum(counts):
+                formulas = formulas[:np.sum(counts)]
+                break
     else:
         raise 42
 
