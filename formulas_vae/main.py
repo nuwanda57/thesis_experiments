@@ -7,14 +7,14 @@ from formulas_vae import evaluate as my_evaluate
 import torch
 
 
-def main():
+def main(train_file, val_file, test_file):
     vocab = my_vocab.Vocab()
-    vocab.build_from_formula_file('formulas_val_5_10.txt')
+    vocab.build_from_formula_file(train_file)
     vocab.write_vocab_to_file('vocab.txt')
     device = torch.device('cuda')
-    train_batches, _ = my_utils.build_ordered_batches('formulas_train_5_10.txt', vocab, 256, device)
-    valid_batches, _ = my_utils.build_ordered_batches('formulas_val_5_10.txt', vocab, 256, device)
-    test_batches, test_order = my_utils.build_ordered_batches('formulas_test_5_10.txt', vocab, 256, device)
+    train_batches, _ = my_utils.build_ordered_batches(train_file, vocab, 256, device)
+    valid_batches, _ = my_utils.build_ordered_batches(val_file, vocab, 256, device)
+    test_batches, test_order = my_utils.build_ordered_batches(test_file, vocab, 256, device)
 
     model = my_model.FormulaVARE(vocab_size=vocab.size(), token_embedding_dim=128, hidden_dim=128,
                                  encoder_layers_cnt=1, decoder_layers_cnt=1, latent_dim=8)
@@ -25,4 +25,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main('formulas_train_5_10.txt', 'formulas_val_5_10.txt', 'formulas_test_5_10.txt')
