@@ -35,13 +35,13 @@ def generate(vocab, model, z, max_len):
     return torch.cat(formulas)
 
 
-def reconstruct(vocab, device, model, batches, order, max_len):
+def reconstruct(vocab, device, model, batches, order, max_len, out_file):
     z = encode(batches, order, model)
     reconstructed_formulas = decode(vocab, z, model, device, max_len)
-    with open('out', 'w') as f:
+    with open(out_file, 'w') as f:
         for formula in reconstructed_formulas:
             f.write(' '.join(formula) + '\n')
-    with open('z_out', 'w') as f:
+    with open(out_file + 'z', 'w') as f:
         for batch_z in z:
             for zi in batch_z:
                 for zi_k in zi:
