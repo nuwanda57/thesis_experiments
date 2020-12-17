@@ -12,7 +12,6 @@ ModelParams = namedtuple('ModelParams', [
 ModelParams.__new__.__defaults__ = (None,) * len(ModelParams._fields)
 
 
-
 class FormulaVARE(nn.Module):
     # Overall model architecture is based on but not identical to https://github.com/shentianxiao/text-autoencoders.
 

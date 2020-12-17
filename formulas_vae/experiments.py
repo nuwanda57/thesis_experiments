@@ -39,8 +39,7 @@ def percent_of_reconstructed_formulas_based_depending_on_epoch(
         model.reconstruct(test_batches, test_order, max_len, rec_file_template % epochs, strategy=reconstruct_strategy)
 
     stats = []
-    for i in range(len(epochs_list)):
-        rec_file = results_dir, 'rec_%d' % epochs
+    for epochs in epochs_list:
         _, _, percent_correct = my_analyse_results.main(rec_file_template % epochs, test_file)
         stats.append(percent_correct)
 

@@ -1,4 +1,5 @@
 import torch
+from sklearn.metrics import mean_squared_error
 
 
 def build_single_batch_from_formulas_list(formulas_list, vocab, device):
@@ -75,16 +76,17 @@ def polynom_to_normal_formula(polynom):
     return polish_to_standard(formula)
 
 
-def eval_polynom(polynom, x):
+def eval_polynom(polynom, xs):
     formula = polynom_to_normal_formula(polynom)
     x_count = formula.count('x')
     formula = formula.replace('x', '%d')
     formula = formula.replace('^', '**')
-    formula = formula % ((x,) * x_count)
-    return eval(formula)
+
+    results = [eval(formula % ((x,) * x_count)) for x in xs]
+    return results
 
 
 
 if __name__ == '__main__':
     print(polynom_to_normal_formula('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +'))
-    print(eval_polynom('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +', 5))
+    print(eval_polynom('<n> 1 <n> 2 x * +', [5, 1, 2]))
