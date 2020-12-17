@@ -32,6 +32,7 @@ def percent_of_reconstructed_formulas_based_depending_on_epoch(
             print('WARNING: rec file already exists, skipping epochs %d' % epochs)
             continue
         model_params.vocab = vocab
+        model_params.vocab_size = vocab.size()
         model = my_model.ExtendedFormulaVARE(model_params)
         model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
