@@ -13,7 +13,7 @@ import results.analyse_results as my_analyse_results
 
 def percent_of_reconstructed_formulas_based_depending_on_epoch(
         train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
-        model_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+        model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
 
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
@@ -31,8 +31,7 @@ def percent_of_reconstructed_formulas_based_depending_on_epoch(
         if os.path.exists(rec_file_template % epochs):
             print('WARNING: rec file already exists, skipping epochs %d' % epochs)
             continue
-        model_params.vocab = vocab
-        model_params.vocab_size = vocab.size()
+        model_params = my_model.ModelParams(vocab=vocab, vocab_size=vocab.size(), device=device, **model_conf_params)
         model = my_model.ExtendedFormulaVARE(model_params)
         model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
