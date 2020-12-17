@@ -84,6 +84,14 @@ def eval_polynom(polynom, xs):
     formula = formula.replace('x', '%f')
     formula = formula.replace('^', '**')
 
+    results = []
+    for x in xs:
+        try:
+            results.append(eval(formula % ((x,) * x_count)))
+        except:
+            print('Can\'t eval %s\nFormula %s' % (formula % ((x,) * x_count), formula))
+            results.append(100)
+
     results = [eval(formula % ((x,) * x_count)) for x in xs]
     return results
 
