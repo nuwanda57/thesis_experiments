@@ -31,6 +31,7 @@ def percent_of_reconstructed_formulas_based_depending_on_epoch(
         if os.path.exists(rec_file_template % epochs):
             print('WARNING: rec file already exists, skipping epochs %d' % epochs)
             continue
+        model_params.vocab = vocab
         model = my_model.ExtendedFormulaVARE(model_params)
         model.to(device)
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
