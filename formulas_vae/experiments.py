@@ -74,7 +74,7 @@ def percent_of_reconstructed_formulas_based_depending_on_epoch(
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
 
-    reconstruct_test_based_on_epoch(
+    reconstruct_test_based_on_epoch_tmp(
         train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
         model_conf_params, batch_size=batch_size, lr=lr, betas=betas)
 
