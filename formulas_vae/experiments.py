@@ -105,7 +105,7 @@ def mse_on_reconstructed_formulas_based_depending_on_epoch(
     stats = []
     rec_file_template = os.path.join(results_dir, 'rec_%d')
     for epochs in epochs_list:
-        stats.append(my_utils.mean_reconstruction_mse(rec_file_template % epochs, test_file, np.linspace(0, 1, 50)))
+        stats.append(my_utils.mean_reconstruction_mse(rec_file_template % epochs, test_file, [0.1, 0.2, 0.5]))
 
     stats_file = os.path.join(results_dir, 'stats.json')
     with open(stats_file, 'w') as outfile:

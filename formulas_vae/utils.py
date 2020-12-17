@@ -79,7 +79,11 @@ def polynom_to_normal_formula(polynom):
 
 
 def eval_polynom(polynom, xs):
-    formula = polynom_to_normal_formula(polynom)
+    try:
+        formula = polynom_to_normal_formula(polynom)
+    except:
+        print('Can\'t convert to normal formula: %s' % polynom)
+        return [100.] * len(xs)
     x_count = formula.count('x')
     formula = formula.replace('x', '%f')
     formula = formula.replace('^', '**')
@@ -90,7 +94,7 @@ def eval_polynom(polynom, xs):
             results.append(eval(formula % ((x,) * x_count)))
         except:
             print('Can\'t eval %s\nFormula %s' % (formula % ((x,) * x_count), formula))
-            results.append(100)
+            results.append(100.)
 
     results = [eval(formula % ((x,) * x_count)) for x in xs]
     return results
