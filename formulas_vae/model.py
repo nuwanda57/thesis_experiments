@@ -112,7 +112,7 @@ class ExtendedFormulaVARE(FormulaVARE):
                 raise 42
             z.append(zi)
         # z_shape = (len(z), -1, z[0].shape[1])
-        batch_size = z[0].shape(0)
+        batch_size = z[0].shape[1]
         z = np.concatenate(z, axis=0)
         _, z = zip(*sorted(zip(order, z), key=lambda t: t[0]))
         z = np.array(list(z))
