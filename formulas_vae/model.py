@@ -112,13 +112,17 @@ class ExtendedFormulaVARE(FormulaVARE):
                 raise 42
             z.append(zi)
         # z_shape = (len(z), -1, z[0].shape[1])
+        batch_size = z[0].shape(0)
         z = np.concatenate(z, axis=0)
-        z_ = np.zeros_like(z)
-        z_[np.array(order)] = z
-        return z_
-        # _, z = zip(*sorted(zip(order, z), key=lambda t: t[0]))
-        # z = np.array(list(z))
-        # # z: (batches, z_in_batch, latent_dim)
+        _, z = zip(*sorted(zip(order, z), key=lambda t: t[0]))
+        z = np.array(list(z))
+        i = 0
+        new_z = []
+        while i < len(z):
+            new_z.append(torch.tensor(z[i: i + batch_size]))
+            i += batch_size
+        return new_z
+        # z: (batches, z_in_batch, latent_dim)
         # return z.reshape(z_shape)
 
     def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample'):
