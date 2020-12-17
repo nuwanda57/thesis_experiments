@@ -53,7 +53,7 @@ def update_train_dataset(old_train_path, new_train_path, vocab, model, batch_siz
 
 
 def train(vocab, model, optimizer, train_file_path, valid_batches, epochs, batch_size, max_len, device,
-          log_interval=20, update_train_epochs=20, training_log_dir='training/', choose_worst=True):
+          log_interval=20, update_train_epochs=50, training_log_dir='training/', choose_worst=True):
 
     xs = np.linspace(0.0, 1.0, num=100)
     if not os.path.exists(training_log_dir):
