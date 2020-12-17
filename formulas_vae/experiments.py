@@ -64,7 +64,7 @@ def reconstruct_test_based_on_epoch_tmp(
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
         my_train_best_worst.train(
             vocab, model, optimizer, train_file, valid_batches, epochs, batch_size, max_len, device,
-            log_interval=20, update_train_epochs=3, training_log_dir='training/', choose_worst=True)
+            log_interval=20, update_train_epochs=20, training_log_dir='training/', choose_worst=True)
         model.reconstruct(test_batches, test_order, max_len, rec_file_template % epochs, strategy=reconstruct_strategy)
 
 
