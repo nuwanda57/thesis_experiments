@@ -1,6 +1,8 @@
 import torch
 from sklearn.metrics import mean_squared_error
 
+import numpy as np
+
 
 def build_single_batch_from_formulas_list(formulas_list, vocab, device):
     batch_in, batch_out = [], []
@@ -79,14 +81,29 @@ def polynom_to_normal_formula(polynom):
 def eval_polynom(polynom, xs):
     formula = polynom_to_normal_formula(polynom)
     x_count = formula.count('x')
-    formula = formula.replace('x', '%d')
+    formula = formula.replace('x', '%f')
     formula = formula.replace('^', '**')
 
     results = [eval(formula % ((x,) * x_count)) for x in xs]
     return results
 
 
+def reconstruction_mses(rec_file, test_file, xs):
+    results = []
+    with open(rec_file) as rec, open(test_file) as test:
+        for rec_line, test_line in zip(rec, test):
+            rec_results, test_results = eval_polynom(rec_line, xs), eval_polynom(test_line, xs)
+            results.append(mean_squared_error(rec_results, test_results))
+    return results
+
+
+def mean_reconstruction_mse(rec_file, test_file, xs):
+    mses = reconstruction_mses(rec_file, test_file, xs)
+    return np.mean(mses)
+
 
 if __name__ == '__main__':
     print(polynom_to_normal_formula('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +'))
     print(eval_polynom('<n> 1 <n> 2 x * +', [5, 1, 2]))
+    print(reconstruction_mses('./../../rec_100', './../../formulas_test_5_10.txt', [0.3, 0.5, 0.2, 0.1]))
+    print(mean_reconstruction_mse('./../../rec_100', './../../formulas_test_5_10.txt', [0.3, 0.5, 0.2, 0.1]))

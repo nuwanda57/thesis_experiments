@@ -11,10 +11,9 @@ import formulas_vae.train as my_train
 import results.analyse_results as my_analyse_results
 
 
-def percent_of_reconstructed_formulas_based_depending_on_epoch(
+def reconstruct_test_based_on_epoch(
         train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
         model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
-
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
 
@@ -38,10 +37,45 @@ def percent_of_reconstructed_formulas_based_depending_on_epoch(
         my_train.train(vocab, model, optimizer, train_batches, valid_batches, epochs)
         model.reconstruct(test_batches, test_order, max_len, rec_file_template % epochs, strategy=reconstruct_strategy)
 
+
+def percent_of_reconstructed_formulas_based_depending_on_epoch(
+        train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
+        model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+
+    if not os.path.exists(results_dir):
+        os.mkdir(results_dir)
+
+    reconstruct_test_based_on_epoch(
+        train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
+        model_conf_params, batch_size=batch_size, lr=lr, betas=betas)
+
     stats = []
+    rec_file_template = os.path.join(results_dir, 'rec_%d')
     for epochs in epochs_list:
         _, _, percent_correct = my_analyse_results.main(rec_file_template % epochs, test_file)
         stats.append(percent_correct)
+
+    stats_file = os.path.join(results_dir, 'stats.json')
+    with open(stats_file, 'w') as outfile:
+        json.dump(stats, outfile)
+
+    return stats
+
+
+def mse_on_reconstructed_formulas_based_depending_on_epoch(
+        train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
+        model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+    if not os.path.exists(results_dir):
+        os.mkdir(results_dir)
+
+    reconstruct_test_based_on_epoch(
+        train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
+        model_conf_params, batch_size=batch_size, lr=lr, betas=betas)
+
+    stats = []
+    rec_file_template = os.path.join(results_dir, 'rec_%d')
+    for epochs in epochs_list:
+        stats.append(my_utils.mean_reconstruction_mse(rec_file_template % epochs, test_file))
 
     stats_file = os.path.join(results_dir, 'stats.json')
     with open(stats_file, 'w') as outfile:
