@@ -1,5 +1,6 @@
 import os
 import json
+import numpy as np
 
 import torch
 
@@ -63,7 +64,7 @@ def reconstruct_test_based_on_epoch_tmp(
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
         my_train_best_worst.train(
             vocab, model, optimizer, train_file, valid_batches, epochs, batch_size, max_len, device,
-            log_interval=20, update_train_epochs=20, training_log_dir='training/', choose_worst=True)
+            log_interval=40, update_train_epochs=20, training_log_dir='training/', choose_worst=True)
         model.reconstruct(test_batches, test_order, max_len, rec_file_template % epochs, strategy=reconstruct_strategy)
 
 
@@ -104,7 +105,7 @@ def mse_on_reconstructed_formulas_based_depending_on_epoch(
     stats = []
     rec_file_template = os.path.join(results_dir, 'rec_%d')
     for epochs in epochs_list:
-        stats.append(my_utils.mean_reconstruction_mse(rec_file_template % epochs, test_file))
+        stats.append(my_utils.mean_reconstruction_mse(rec_file_template % epochs, test_file, np.linspace(0, 1, 50)))
 
     stats_file = os.path.join(results_dir, 'stats.json')
     with open(stats_file, 'w') as outfile:

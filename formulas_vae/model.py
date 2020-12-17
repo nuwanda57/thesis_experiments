@@ -111,12 +111,15 @@ class ExtendedFormulaVARE(FormulaVARE):
             else:
                 raise 42
             z.append(zi)
-        z_shape = (len(z), -1, z[0].shape[1])
+        # z_shape = (len(z), -1, z[0].shape[1])
         z = np.concatenate(z, axis=0)
-        _, z = zip(*sorted(zip(order, z), key=lambda t: t[0]))
-        z = np.array(list(z))
-        # z: (batches, z_in_batch, latent_dim)
-        return z.reshape(z_shape)
+        z_ = np.zeros_like(z)
+        z_[np.array(order)] = z
+        return z_
+        # _, z = zip(*sorted(zip(order, z), key=lambda t: t[0]))
+        # z = np.array(list(z))
+        # # z: (batches, z_in_batch, latent_dim)
+        # return z.reshape(z_shape)
 
     def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample'):
         z = self.build_ordered_latents(batches, order, strategy=strategy)
