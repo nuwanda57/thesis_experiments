@@ -41,7 +41,7 @@ def update_train_dataset(old_train_path, new_train_path, vocab, model, batch_siz
     mse_with_inds = list(enumerate(mses))
     mse_with_inds.sort(key=lambda k: k[1], reverse=choose_worst)
 
-    new_formula_indices = set([m[0] for m in mse_with_inds[:(len(mse_with_inds) * fraction)]])
+    new_formula_indices = set([m[0] for m in mse_with_inds[:(int(len(mse_with_inds) * fraction))]])
     written = 0
     with open(old_train_path) as old_file, open(new_train_path, 'w') as new_file:
         for i, line in enumerate(old_file):

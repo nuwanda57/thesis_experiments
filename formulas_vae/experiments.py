@@ -42,7 +42,7 @@ def reconstruct_test_based_on_epoch(
 
 def reconstruct_test_based_on_epoch_tmp(
         train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
-        model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+        model_conf_params, update_train_epochs, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
 
@@ -64,20 +64,20 @@ def reconstruct_test_based_on_epoch_tmp(
         optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
         my_train_best_worst.train(
             vocab, model, optimizer, train_file, valid_batches, epochs, batch_size, max_len, device,
-            log_interval=20, update_train_epochs=50, training_log_dir='training/', choose_worst=True)
+            log_interval=20, update_train_epochs=update_train_epochs, training_log_dir='training/', choose_worst=True)
         model.reconstruct(test_batches, test_order, max_len, rec_file_template % epochs, strategy=reconstruct_strategy)
 
 
 def percent_of_reconstructed_formulas_based_depending_on_epoch(
         train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
-        model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+        model_conf_params, update_train_epochs, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
 
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
 
     reconstruct_test_based_on_epoch_tmp(
         train_file, val_file, test_file, reconstruct_strategy, max_len, epochs_list, results_dir,
-        model_conf_params, batch_size=batch_size, lr=lr, betas=betas)
+        model_conf_params, update_train_epochs, batch_size=batch_size, lr=lr, betas=betas)
 
     stats = []
     rec_file_template = os.path.join(results_dir, 'rec_%d')
