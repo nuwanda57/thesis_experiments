@@ -84,13 +84,13 @@ def train(vocab, model, optimizer, train_file_path, valid_batches, epochs, batch
                 print('loss: %0.3f, rec loss: %0.3f, kl: %0.3f' % (
                     np.mean(losses), np.mean(rec_losses), np.mean(kl_losses)))
 
-            if (i + 1) % update_train_epochs == 0:
-                print('updating train dataset')
-                new_train_path = os.path.join(training_log_dir, 'train_%d.txt' % (i + 1))
-                update_train_dataset(cur_train_path, new_train_path, vocab, model, batch_size, device, max_len,
-                                     xs, training_log_dir, choose_worst, 0.9)
-                cur_train_path = new_train_path
-                train_batches, _ = my_utils.build_ordered_batches(cur_train_path, vocab, batch_size, device)
+        if (epoch + 1) % update_train_epochs == 0:
+            print('updating train dataset')
+            new_train_path = os.path.join(training_log_dir, 'train_%d.txt' % (i + 1))
+            update_train_dataset(cur_train_path, new_train_path, vocab, model, batch_size, device, max_len,
+                                 xs, training_log_dir, choose_worst, 0.9)
+            cur_train_path = new_train_path
+            train_batches, _ = my_utils.build_ordered_batches(cur_train_path, vocab, batch_size, device)
 
         valid_losses = evaluate(model, valid_batches, vocab)
         print('\t[validation] loss: %0.3f, rec loss: %0.3f, kl: %0.3f' % valid_losses)
