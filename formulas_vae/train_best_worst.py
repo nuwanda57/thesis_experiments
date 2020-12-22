@@ -44,7 +44,8 @@ def update_train_dataset(old_train_path, new_train_path, vocab, model, batch_siz
     new_formula_indices = set([m[0] for m in mse_with_inds[:(int(len(mse_with_inds) * fraction))]])
     written = 0
     with open(old_train_path) as old_file, open(new_train_path, 'w') as new_file:
-        for i, line in enumerate(old_file):
+        for i, line1 in enumerate(old_file):
+            line = line1.strip()
             if i in new_formula_indices:
                 new_file.write(line)
                 written += 1
@@ -86,7 +87,7 @@ def train(vocab, model, optimizer, train_file_path, valid_batches, epochs, batch
 
         if (epoch + 1) % update_train_epochs == 0:
             print('updating train dataset')
-            new_train_path = os.path.join(training_log_dir, 'train_%d.txt' % (i + 1))
+            new_train_path = os.path.join(training_log_dir, 'train_%d.txt' % (epoch + 1))
             update_train_dataset(cur_train_path, new_train_path, vocab, model, batch_size, device, max_len,
                                  xs, training_log_dir, choose_worst, 0.9)
             cur_train_path = new_train_path
