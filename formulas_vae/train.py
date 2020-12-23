@@ -27,29 +27,27 @@ def evaluate(model, batches, vocab):
     return loss, np.mean(rec_losses), np.mean(kl_losses)
 
 
-def train(vocab, model, optimizer, train_batches, valid_batches, epochs, log_interval=20):
-    for epoch in range(epochs):
-        print('Epoch %d' % (epoch + 1))
-        kl_losses, rec_losses, losses = [], [], []
-        model.train()
-        indices = list(range(len(train_batches)))
-        random.shuffle(indices)
-        for i, idx in enumerate(indices):
-            optimizer.zero_grad()
-            inputs, targets = train_batches[idx]
-            logits, mu, logsigma, z = model(inputs)
-            rec, kl = loss_function(logits, targets, mu, logsigma, vocab)
-            loss = rec
-            loss.backward()
-            optimizer.step()
-            rec_losses.append(rec.item())
-            losses.append(loss.item())
-            kl_losses.append(kl.item())
+def run_epoch(vocab, model, optimizer, train_batches, valid_batches, epoch):
+    print('Epoch %d' % epoch)
+    kl_losses, rec_losses, losses = [], [], []
+    model.train()
+    indices = list(range(len(train_batches)))
+    random.shuffle(indices)
+    for i, idx in enumerate(indices):
+        optimizer.zero_grad()
+        inputs, targets = train_batches[idx]
+        logits, mu, logsigma, z = model(inputs)
+        rec, kl = loss_function(logits, targets, mu, logsigma, vocab)
+        loss = rec
+        loss.backward()
+        optimizer.step()
+        rec_losses.append(rec.item())
+        losses.append(loss.item())
+        kl_losses.append(kl.item())
 
-            if (i + 1) % log_interval == 0:
-                print('\t[training] %d/%d' % (i + 1, len(indices)), end=' ')
-                print('loss: %0.3f, rec loss: %0.3f, kl: %0.3f' % (
-                    np.mean(losses), np.mean(rec_losses), np.mean(kl_losses)))
+    print('\t[training] batches count: %d' % len(indices))
+    print('\t[training] loss: %0.3f, rec loss: %0.3f, kl: %0.3f' % (
+        np.mean(losses), np.mean(rec_losses), np.mean(kl_losses)))
 
-        valid_losses = evaluate(model, valid_batches, vocab)
-        print('\t[validation] loss: %0.3f, rec loss: %0.3f, kl: %0.3f' % valid_losses)
+    valid_losses = evaluate(model, valid_batches, vocab)
+    print('\t[validation] loss: %0.3f, rec loss: %0.3f, kl: %0.3f' % valid_losses)
