@@ -51,6 +51,7 @@ def reconstruct_test_per_epoch(
             my_train_utils.update_train_dataset(train_dataset_update, old_train_file, new_train_file, vocab, model,
                                                 batch_size, device, max_len, xs, training_log_dir, choose_worst,
                                                 fraction)
+            train_batches, _ = my_utils.build_ordered_batches(new_train_file, vocab, batch_size, device)
             old_train_file = new_train_file
 
 
