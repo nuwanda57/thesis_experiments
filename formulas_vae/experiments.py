@@ -45,7 +45,7 @@ def reconstruct_test_per_epoch(
         if epoch % reconstruct_frequency == 0:
             model.reconstruct(
                 test_batches, test_order, max_len, rec_file_template % epoch, strategy=reconstruct_strategy)
-        if epoch % train_dataset_update_frequency == 0:
+        if epoch % train_dataset_update_frequency == 0 and train_dataset_update:
             xs = np.linspace(0.1, 1.0, num=100)
             new_train_file = training_new_file_template % epoch
             my_train_utils.update_train_dataset(train_dataset_update, old_train_file, new_train_file, vocab, model,
