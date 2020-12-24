@@ -113,7 +113,8 @@ def reconstruction_mses(rec_file, test_file, xs):
         for rec_line, test_line in zip(rec, test):
             rec_results, test_results = eval_polynom(rec_line, xs), eval_polynom(test_line, xs)
             if rec_results is None:
-                results.append(1e6)
+                results.append(len(xs) * 100)
+                continue
             if test_results is None:
                 print(test_line)
                 raise 42
@@ -128,8 +129,9 @@ def mean_reconstruction_mse(rec_file, test_file, xs):
 
 
 if __name__ == '__main__':
-    print(polynom_to_normal_formula('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +'))
-    print(eval_polynom('<n> 1 <n> 2 x * +', [5, 1, 2]))
-    print(eval_polynom('<n> 1 5 <n> 1 9 x * + <n> 7 x <n> 2 ^ * + <n> 4 5 x <n> 3 ^ * +', [5,1,2]))
-    print(sorted(reconstruction_mses('./../../rec_100', './../../formulas_test_5_10.txt', [0.3, 0.5, 0.2, 0.1])))
-    print(mean_reconstruction_mse('./../tt2', './../tt1.txt', [0.3, 0.5, 0.2, 0.1]))
+    # print(polynom_to_normal_formula('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +'))
+    # print(eval_polynom('<n> 1 <n> 2 x * +', [5, 1, 2]))
+    # print(eval_polynom('<n> 1 5 <n> 1 9 x * + <n> 7 x <n> 2 ^ * + <n> 4 5 x <n> 3 ^ * +', [5,1,2]))
+    # print(sorted(reconstruction_mses('./../../rec_100', './../../formulas_test_5_10.txt', [0.3, 0.5, 0.2, 0.1])))
+    # print(mean_reconstruction_mse('./../tt2', './../tt1.txt', [0.3, 0.5, 0.2, 0.1]))
+    print(reconstruction_mses('./../rec_400', './../tt1.txt', list(np.linspace(0.1, 1, 25))))
