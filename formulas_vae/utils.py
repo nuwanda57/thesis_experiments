@@ -109,6 +109,7 @@ def reconstruction_mses(rec_file, test_file, xs):
         for rec_line, test_line in zip(rec, test):
             rec_results, test_results = eval_polynom(rec_line, xs), eval_polynom(test_line, xs)
             results.append(mean_squared_error(rec_results, test_results))
+    print('\nfinished processing %s' % rec_file)
     return results
 
 
