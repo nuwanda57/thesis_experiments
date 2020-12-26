@@ -1,5 +1,5 @@
 import torch
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 import numpy as np
 
@@ -128,10 +128,40 @@ def mean_reconstruction_mse(rec_file, test_file, xs):
     return np.mean(mses)
 
 
+def reconstruction_metric_eval(rec_file, test_file, xs, metric):
+    results = []
+    with open(rec_file) as rec, open(test_file) as test:
+        for rec_line, test_line in zip(rec, test):
+            rec_results, test_results = eval_polynom(rec_line, xs), eval_polynom(test_line, xs)
+            if rec_results is None:
+                results.append(len(xs) * 100)
+                continue
+            if test_results is None:
+                print(test_line)
+                raise 42
+            if metric == 'mse':
+                results.append(mean_squared_error(rec_results, test_results))
+            elif metric == 'mae':
+                results.append(mean_absolute_error(rec_results, test_results))
+            elif metric == 'male':
+                rec_results = np.array(rec_results)
+                test_results = np.array(test_results)
+                results.append(np.mean(np.log(1 + np.abs(test_results)) - np.log(1 + np.abs(rec_results))))
+            else:
+                raise 42
+    print('\nfinished processing %s' % rec_file)
+    return results
+
+
+def mean_reconstruction_metric_eval(rec_file, test_file, xs, metric):
+    metric_values = reconstruction_metric_eval(rec_file, test_file, xs, metric)
+    return np.mean(metric_values)
+
+
 if __name__ == '__main__':
     # print(polynom_to_normal_formula('<n> 1 3 <n> 1 2 x * + <n> 2 3 x <n> 2 ^ * + <n> 4 3 x <n> 3 ^ * +'))
     # print(eval_polynom('<n> 1 <n> 2 x * +', [5, 1, 2]))
     # print(eval_polynom('<n> 1 5 <n> 1 9 x * + <n> 7 x <n> 2 ^ * + <n> 4 5 x <n> 3 ^ * +', [5,1,2]))
     # print(sorted(reconstruction_mses('./../../rec_100', './../../formulas_test_5_10.txt', [0.3, 0.5, 0.2, 0.1])))
     # print(mean_reconstruction_mse('./../tt2', './../tt1.txt', [0.3, 0.5, 0.2, 0.1]))
-    print(reconstruction_mses('./../rec_400', './../tt1.txt', list(np.linspace(0.1, 1, 25))))
+    print(reconstruction_metric_eval('./../rec_400', './../tt1.txt', list(np.linspace(0.1, 1, 25)), 'mae'))
