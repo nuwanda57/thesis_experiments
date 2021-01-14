@@ -1,5 +1,4 @@
 import os
-import json
 import numpy as np
 
 import torch
@@ -8,10 +7,7 @@ import formulas_vae.vocab as my_vocab
 import formulas_vae.utils as my_utils
 import formulas_vae.model as my_model
 import formulas_vae.train as my_train
-import formulas_vae.train_best_worst as my_train_best_worst
 import formulas_vae.train_utils as my_train_utils
-
-import results.analyse_results as my_analyse_results
 
 
 def reconstruct_test_per_epoch(

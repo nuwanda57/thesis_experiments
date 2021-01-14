@@ -1,6 +1,5 @@
-from formulas_vae import vocab as my_vocab
+from formulas_vae import vocab as my_vocab, model as my_model
 from formulas_vae import utils as my_utils
-from formulas_vae import model as my_model
 from formulas_vae import train as my_train
 from formulas_vae import evaluate as my_evaluate
 
