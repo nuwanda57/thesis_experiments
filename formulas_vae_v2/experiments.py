@@ -61,4 +61,4 @@ def exp_generative_train(train_file, val_file, test_file, reconstruct_strategy, 
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
     my_generative_train.generative_train(model, vocab, optimizer, epochs, device, batch_size,
-                                         20000, 'sample', max_len, 0.5, 250, train_batches, valid_batches)
+                                         2000, 'sample', max_len, 0.2, 250, train_batches, valid_batches)
