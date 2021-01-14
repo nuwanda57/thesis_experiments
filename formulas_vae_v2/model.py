@@ -124,12 +124,11 @@ class FormulaVARE(nn.Module):
             reconstructed_formulas.append([self.vocab.index_to_token[id] for id in e_formula[1:]])
         reconstructed_formulas = [
             f[:f.index(self.vocab.eos_token)] if self.vocab.eos_token in f else f for f in reconstructed_formulas]
-        zs = [zi for batch_z in z for zi in batch_z]
 
         for i in range(len(reconstructed_formulas)):
             reconstructed_formulas[i] = my_formula_utils.unify_tokens_into_numbers(reconstructed_formulas[i])
 
-        return reconstructed_formulas, zs
+        return reconstructed_formulas
 
     def maybe_write_formulas(self, reconstructed_formulas, zs, out_file=None):
         if out_file is not None:
@@ -141,15 +140,15 @@ class FormulaVARE(nn.Module):
                     for zi_k in zi:
                         f.write('%f ' % zi_k)
                     f.write('\n')
-        return reconstructed_formulas, zs
 
     def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample'):
         z = self.build_ordered_latents(batches, order, strategy=strategy)
+        zs = [zi for batch_z in z for zi in batch_z]
         # z: (batches, z_in_batch, latent_dim)
         encoded_formulas = self.reconstruct_encoded_formulas_from_latent_batched(z, max_len)
         # encoded_formulas: (total_formula_count, max_len)
-        reconstructed_formulas, zs = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
-        reconstructed_formulas, zs = self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+        reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+        self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
 
         return reconstructed_formulas, zs
 
@@ -177,10 +176,10 @@ class FormulaVARE(nn.Module):
         return formulas
 
     def sample(self, n_formulas, max_len, out_file=None):
-        z = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
-        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(z, max_len)
-        reconstructed_formulas, zs = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
-        reconstructed_formulas, zs = self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+        zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
+        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
+        reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+        self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
 
         return reconstructed_formulas, zs
 
