@@ -5,6 +5,8 @@ import numpy as np
 
 from collections import namedtuple
 
+import formulas_vae_v2.formula_utils as my_formula_utils
+
 
 ModelParams = namedtuple('ModelParams', [
     'vocab_size', 'token_embedding_dim', 'hidden_dim', 'encoder_layers_cnt', 'decoder_layers_cnt',
@@ -127,6 +129,9 @@ class FormulaVARE(nn.Module):
         reconstructed_formulas = [
             f[:f.index(self.vocab.eos_token)] if self.vocab.eos_token in f else f for f in reconstructed_formulas]
         zs = [zi for batch_z in z for zi in batch_z]
+
+        for i in range(len(reconstructed_formulas)):
+            reconstructed_formulas[i] = my_formula_utils.unify_tokens_into_numbers(reconstructed_formulas[i])
 
         if out_file is not None:
             with open(out_file, 'w') as f:
