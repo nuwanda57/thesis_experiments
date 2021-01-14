@@ -1,5 +1,7 @@
 from collections import Counter
 
+import formulas_vae_v2.formula_utils as my_formula_utils
+
 
 class Vocab(object):
     def __init__(self):
@@ -59,7 +61,7 @@ class Vocab(object):
 
     def build_from_formula_list(self, formulas):
         # formulas: [['2', 'x', '*'], ['x', '4', '^'], ['3', '4']]
-        tokens = [tok for f in formulas for tok in f]
+        tokens = [tok for f in formulas for tok in my_formula_utils.split_numbers_into_tokens(f)]
         tokens_counter = Counter(tokens)
         self._build_from_counter(tokens_counter)
         self._is_built = True
@@ -68,7 +70,7 @@ class Vocab(object):
         tokens_counter = Counter()
         with open(formulas_path) as f:
             for formula in f:
-                tokens_counter.update(formula.split())
+                tokens_counter.update(my_formula_utils.split_numbers_into_tokens(formula.split()))
         self._build_from_counter(tokens_counter)
         self._is_built = True
 

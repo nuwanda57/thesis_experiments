@@ -38,5 +38,5 @@ def unify_tokens_into_numbers(formula):
 
 
 if __name__ == '__main__':
-    print(split_numbers_into_tokens('1 x mult 13 x 3 pow mult add'.split()))
+    print(split_numbers_into_tokens('10 13 x mult add 11 x 2 pow mul add 35 x 3 pow mul add 28 x 4 pow mul add'.split()))
     print(unify_tokens_into_numbers('<n> 1 x mult <n> 1 3 x <n> 3 pow mult add'.split()))

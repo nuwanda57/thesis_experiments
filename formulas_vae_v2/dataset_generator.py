@@ -18,7 +18,7 @@ def generate_polynomials_dataset_from_vocab(count, vocab=my_formula_config.COEFF
         first_term = f'{coefs[1]} x mult add'
         if len(coefs) == 2:
             return f'{zero_term} {first_term}'
-        standard_term_template = '%s x %d pow mul add'
+        standard_term_template = '%s x %d pow mult add'
         standard_polynomial_part = ' '.join(
             [standard_term_template % (coef, i + 2) for i, coef in enumerate(coefs[2:])])
         return f'{zero_term} {first_term} {standard_polynomial_part}'
@@ -53,6 +53,7 @@ def generate_formulas_dataset(filenames, counts, type='polynomial_vocab', **kwar
 
 def main(filenames, counts, max_power):
     generate_formulas_dataset(filenames, counts, max_power=max_power)
+
 
 if __name__ == '__main__':
     main(['train.txt', 'val.txt', 'test.txt'], [20, 10, 10], 7)
