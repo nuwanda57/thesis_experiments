@@ -55,7 +55,10 @@ def evaluate_file(filename, xs):
             formulas.append(line.strip())
     results = []
     for formula in formulas:
-        results.append(evaluate(formula, xs))
+        try:
+            results.append(evaluate(formula, xs))
+        except:
+            results.append(None)
     return results
 
 
