@@ -48,5 +48,16 @@ def evaluate(formula, xs):
     return results
 
 
+def evaluate_file(filename, xs):
+    formulas = []
+    with open(filename) as f:
+        for line in f:
+            formulas.append(line.strip())
+    results = []
+    for formula in formulas:
+        results.append(evaluate(formula, xs))
+    return results
+
+
 if __name__ == '__main__':
     print(evaluate('3 x mult', [2]))

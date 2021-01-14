@@ -118,11 +118,7 @@ class FormulaVARE(nn.Module):
         # z: (batches, z_in_batch, latent_dim)
         # return z.reshape(z_shape)
 
-    def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample'):
-        z = self.build_ordered_latents(batches, order, strategy=strategy)
-        # z: (batches, z_in_batch, latent_dim)
-        encoded_formulas = self.reconstruct_encoded_formulas_from_latent(z, max_len)
-        # encoded_formulas: (total_formula_count, max_len)
+    def reconstructed_formulas_from_encoded_formulas(self, encoded_formulas):
         reconstructed_formulas = []
         for e_formula in encoded_formulas:
             reconstructed_formulas.append([self.vocab.index_to_token[id] for id in e_formula[1:]])
@@ -133,6 +129,9 @@ class FormulaVARE(nn.Module):
         for i in range(len(reconstructed_formulas)):
             reconstructed_formulas[i] = my_formula_utils.unify_tokens_into_numbers(reconstructed_formulas[i])
 
+        return reconstructed_formulas, zs
+
+    def maybe_write_formulas(self, reconstructed_formulas, zs, out_file=None):
         if out_file is not None:
             with open(out_file, 'w') as f:
                 for formula in reconstructed_formulas:
@@ -144,24 +143,46 @@ class FormulaVARE(nn.Module):
                     f.write('\n')
         return reconstructed_formulas, zs
 
-    def reconstruct_encoded_formulas_from_latent(self, z_batched, max_len):
+    def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample'):
+        z = self.build_ordered_latents(batches, order, strategy=strategy)
+        # z: (batches, z_in_batch, latent_dim)
+        encoded_formulas = self.reconstruct_encoded_formulas_from_latent_batched(z, max_len)
+        # encoded_formulas: (total_formula_count, max_len)
+        reconstructed_formulas, zs = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+        reconstructed_formulas, zs = self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+
+        return reconstructed_formulas, zs
+
+    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len):
+        formulas = []
+        # z: (z_in_batch, latent_dim)
+        x = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(self.vocab.sos_token_index)
+        # x: (1, z_in_batch)
+        hidden = None
+        for i in range(max_len):
+            formulas.append(x)
+            logits, hidden = self.decode(x, torch.tensor(zs, device=self.device), hidden)
+            x = logits.argmax(dim=-1)
+        # formulas_in_batch [[[f1_0, f2_0, ..]], [[f1_1, f2_1, ..]], ..] -> [[f1_0, f1_1, ..], [f2_0, f2_1, ..], ..]
+        formulas = torch.cat(formulas, 0).T
+        return formulas
+
+    def reconstruct_encoded_formulas_from_latent_batched(self, z_batched, max_len):
         # z_batched: (batches, z_in_batch, latent_dim)
         formulas = []
         for z in z_batched:
-            formulas_in_batch = []
-            # z: (z_in_batch, latent_dim)
-            x = torch.zeros(1, len(z), dtype=torch.long, device=self.device).fill_(self.vocab.sos_token_index)
-            # x: (1, z_in_batch)
-            hidden = None
-            for i in range(max_len):
-                formulas_in_batch.append(x)
-                logits, hidden = self.decode(x, torch.tensor(z, device=self.device), hidden)
-                x = logits.argmax(dim=-1)
-            # formulas_in_batch [[[f1_0, f2_0, ..]], [[f1_1, f2_1, ..]], ..] -> [[f1_0, f1_1, ..], [f2_0, f2_1, ..], ..]
-            formulas_in_batch = torch.cat(formulas_in_batch, 0).T
+            formulas_in_batch = self._reconstruct_encoded_formulas_from_latent(z, max_len)
             for f in formulas_in_batch:
                 formulas.append(f)
         return formulas
+
+    def sample(self, n_formulas, max_len, out_file=None):
+        z = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
+        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(z, max_len)
+        reconstructed_formulas, zs = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+        reconstructed_formulas, zs = self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+
+        return reconstructed_formulas, zs
 
     def _reset_parameters(self):
         for p in self.parameters():
