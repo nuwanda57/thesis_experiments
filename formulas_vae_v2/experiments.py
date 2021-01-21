@@ -63,7 +63,6 @@ def exp_generative_train(train_file, val_file, test_file, reconstruct_strategy, 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
     n_formulas_to_sample = 2000
     use_for_train_fraction = 0.2
-    n_pretrain_steps = 50
     # wandb_log = {
     #     'max_len': max_len,
     #     'epochs': epochs,

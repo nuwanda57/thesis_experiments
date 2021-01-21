@@ -31,9 +31,9 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                 mses.append(inf)
             else:
                 mses.append(mean_squared_error(predicted_ys[i], ys))
-        table = wandb.Table(columns=['epoch', 'formula', 'mse'])
-        for i, f in enumerate(reconstructed_formulas[:20]):
-            table.add_data(epoch, f, mses[i])
+        table = wandb.Table(columns=['epoch', 'formula'])
+        for f in reconstructed_formulas[:20]:
+            table.add_data(epoch, f)
         wandb_log['example formulas'] = table
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)):
@@ -57,6 +57,6 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, vocab, batch_size, device)
         my_train.run_epoch(vocab, model, optimizer, train_batches, pretrain_val_batches, epoch)
     table = wandb.Table(columns=['epoch', 'formula'])
-    for i, f in enumerate(reconstructed_formulas[:200]):
+    for f in reconstructed_formulas[:200]:
         table.add_data(epochs, f)
     wandb.log({'final formula examples': table})
