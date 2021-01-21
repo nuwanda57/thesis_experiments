@@ -42,7 +42,7 @@ def reconstruct_test_per_epoch(
 
 
 def exp_generative_train(train_file, val_file, test_file, reconstruct_strategy, max_len, epochs, results_dir,
-        model_conf_params, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+        model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
     wandb.init(project="generative train")
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
@@ -73,10 +73,10 @@ def exp_generative_train(train_file, val_file, test_file, reconstruct_strategy, 
     #     'chosen_for_train_fraction': use_for_train_fraction,
     #     'n_pretrain_steps': n_pretrain_steps,
     # }
-    configs = (f'max len: {max_len}, epochs: {epochs}, batch size: {batch_size}, learning rate: {lr}, n formulas '
-               f'sampled: {n_formulas_to_sample}, chosen_for_train_fraction: {use_for_train_fraction}, '
-               f'n_pretrain_steps: {n_pretrain_steps}')
-    wandb.log({'configs': configs})
+    table = wandb.Table(columns=["max_len", "epochs", "batch_size", "learning_rate", "n_formulas_sampled",
+                                 "chosen_for_train_fraction", "n_pretrain_steps"])
+    table.add_data(max_len, epochs, batch_size, lr, n_formulas_to_sample, use_for_train_fraction, n_pretrain_steps)
+    wandb.log({'configs': table})
     my_generative_train.generative_train(model, vocab, optimizer, epochs, device, batch_size,
                                          n_formulas_to_sample, 'sample', max_len, use_for_train_fraction,
                                          n_pretrain_steps, train_batches, valid_batches)

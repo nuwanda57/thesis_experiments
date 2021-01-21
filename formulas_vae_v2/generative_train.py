@@ -16,11 +16,13 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
 
     xs = np.linspace(0.0, 1.0, num=100)
     ys = 3 * xs
-    wandb.log({'formuls': '3x'})
+    table = wandb.Table(columns=["correct formula"])
+    table.add_data('y = 3x')
+    wandb.log({'correct formula': table})
+    reconstructed_formulas = []
     for epoch in range(epochs):
         wandb_log = {}
         reconstructed_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
-        wandb_log['example'] = '\n'.join(' '.join(formula) for formula in reconstructed_formulas[:20])
         predicted_ys = my_evaluate_formula.evaluate_file(file_to_sample, xs)
         mses = []
         inf = 10 ** 4
@@ -29,6 +31,10 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                 mses.append(inf)
             else:
                 mses.append(mean_squared_error(predicted_ys[i], ys))
+        table = wandb.Table(columns=['epoch', 'formula', 'mse'])
+        for i, f in enumerate(reconstructed_formulas[:20]):
+            table.add_data(epoch, f, mses[i])
+        wandb_log['example formulas'] = table
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)):
             wandb_log['mean_mse_generated'] = np.mean(mses)
@@ -50,3 +56,7 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
 
         train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, vocab, batch_size, device)
         my_train.run_epoch(vocab, model, optimizer, train_batches, pretrain_val_batches, epoch)
+    table = wandb.Table(columns=['epoch', 'formula'])
+    for i, f in enumerate(reconstructed_formulas[:200]):
+        table.add_data(epochs, f)
+    wandb.log({'final formula examples': table})
