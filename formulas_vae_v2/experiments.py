@@ -64,16 +64,19 @@ def exp_generative_train(train_file, val_file, test_file, reconstruct_strategy, 
     n_formulas_to_sample = 2000
     use_for_train_fraction = 0.2
     n_pretrain_steps = 250
-    wandb_log = {
-        'max_len': max_len,
-        'epochs': epochs,
-        'batch_size': batch_size,
-        'learning_rate': lr,
-        'n_formulas_sampled': n_formulas_to_sample,
-        'chosen_for_train_fraction': use_for_train_fraction,
-        'n_pretrain_steps': n_pretrain_steps,
-    }
-    wandb.log(wandb_log)
+    # wandb_log = {
+    #     'max_len': max_len,
+    #     'epochs': epochs,
+    #     'batch_size': batch_size,
+    #     'learning_rate': lr,
+    #     'n_formulas_sampled': n_formulas_to_sample,
+    #     'chosen_for_train_fraction': use_for_train_fraction,
+    #     'n_pretrain_steps': n_pretrain_steps,
+    # }
+    configs = (f'max len: {max_len}, epochs: {epochs}, batch size: {batch_size}, learning rate: {lr}, n formulas '
+               f'sampled: {n_formulas_to_sample}, chosen_for_train_fraction: {use_for_train_fraction}, '
+               f'n_pretrain_steps: {n_pretrain_steps}')
+    wandb.log({'configs': configs})
     my_generative_train.generative_train(model, vocab, optimizer, epochs, device, batch_size,
                                          n_formulas_to_sample, 'sample', max_len, use_for_train_fraction,
                                          n_pretrain_steps, train_batches, valid_batches)
