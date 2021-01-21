@@ -34,7 +34,8 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         table = wandb.Table(columns=[f'formula, epoch: {epoch}'])
         for f in reconstructed_formulas[:20]:
             table.add_data(f)
-        wandb_log[f'example formulas epoch: {epoch}'] = table
+        if (epoch + 1) % 50:
+            wandb_log[f'example formulas epoch: {epoch}'] = table
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
             wandb_log['log_mean_mse_generated'] = np.log(np.mean(mses))
