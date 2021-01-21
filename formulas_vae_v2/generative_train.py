@@ -36,14 +36,14 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
             table.add_data(f)
         wandb_log[f'example formulas epoch: {epoch}'] = table
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
-        if np.isfinite(np.mean(mses)):
-            wandb_log['mean_mse_generated'] = np.mean(mses)
+        if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
+            wandb_log['log_mean_mse_generated'] = np.log(np.mean(mses))
         best_formula_pairs = sorted(enumerate(mses), key=lambda x: x[1])[:int(len(mses) * use_for_train_fraction)]
         best_formula_pairs = [x for x in best_formula_pairs if x[1] < inf]
         best_formula_mses = [x[1] for x in best_formula_pairs]
         print(f'epoch: {epoch}, mean best mses: {np.mean(best_formula_mses)}')
-        if np.isfinite(np.mean(best_formula_mses)):
-            wandb_log['mean_mse_best_formulas'] = np.mean(best_formula_mses)
+        if np.isfinite(np.mean(best_formula_mses)) and np.isfinite(np.log(np.mean(best_formula_mses))):
+            wandb_log['log_mean_mse_best_formulas'] = np.log(np.mean(best_formula_mses))
         wandb.log(wandb_log)
         best_formula_indices = [x[0] for x in best_formula_pairs]
         best_formulas = []
