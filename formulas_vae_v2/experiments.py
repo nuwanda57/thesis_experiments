@@ -117,7 +117,6 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
         mses = []
         inf = 10 ** 4
         for i in range(len(predicted_ys)):
-            print(predicted_ys[i])
             if predicted_ys[i] is None:
                 mses.append(inf)
             else:
@@ -125,7 +124,7 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
                     mses.append(mean_squared_error(predicted_ys[i], ys))
                 except:
                     print('exception when calculating mse')
-                    print(predicted_ys[:100])
+                    print(predicted_ys[i][:100])
                     mses.append(inf)
         best_formula_pairs = sorted(enumerate(mses), key=lambda x: x[1])[:int(len(mses) * use_for_train_fraction)]
         best_formula_pairs = [x for x in best_formula_pairs if x[1] < inf]
