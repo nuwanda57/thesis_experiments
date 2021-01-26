@@ -132,7 +132,7 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
         epoch_best += best_formula_mses
         epoch_best = sorted(epoch_best)[:400]
         print(f'{epoch} mean best mses: {np.mean(epoch_best)}')
-        print(f'{epoch} mean best mses log : {np.log(epoch_best))}')
+        print(f'{epoch} mean best mses log : {np.log(epoch_best)}')
 
     best_formula_mses = sorted(epoch_best)[:400]
     print(f'mean best mses: {np.mean(best_formula_mses)}')
