@@ -5,12 +5,12 @@ import torch
 
 from sklearn.metrics import mean_squared_error
 
-import formulas_vae_v3.vocab as my_vocab
-import formulas_vae_v3.model as my_model
-import formulas_vae_v3.train as my_train
-import formulas_vae_v3.batch_builder as my_batch_builder
-import formulas_vae_v3.generative_train as my_generative_train
-import formulas_vae_v3.evaluate_formula as my_evaluate_formula
+import formulas_vae_v2.vocab as my_vocab
+import formulas_vae_v2.model as my_model
+import formulas_vae_v2.train as my_train
+import formulas_vae_v2.batch_builder as my_batch_builder
+import formulas_vae_v2.generative_train as my_generative_train
+import formulas_vae_v2.evaluate_formula as my_evaluate_formula
 
 import wandb
 
