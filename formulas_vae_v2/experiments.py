@@ -103,29 +103,34 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
     model = my_model.FormulaVARE(model_params)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
-    n_formulas_to_sample = 2000 * 1500
-    use_for_train_fraction = 0.2 / 1500
+    n_formulas_to_sample = 2000
+    use_for_train_fraction = 0.2
     for step in range(n_pretrain_steps):
         my_train.run_epoch(vocab, model, optimizer, train_batches, valid_batches, step)
 
     xs = np.linspace(0.0, 1.0, num=100)
     ys = 3 * xs
-    reconstructed_formulas, _ = model.sample(n_formulas_to_sample, max_len, 'sample')
-    predicted_ys = my_evaluate_formula.evaluate_file('sample', xs)
-    mses = []
-    inf = 10 ** 4
-    for i in range(len(predicted_ys)):
-        if predicted_ys[i] is None:
-            mses.append(inf)
-        else:
-            mses.append(mean_squared_error(predicted_ys[i], ys))
-    best_formula_pairs = sorted(enumerate(mses), key=lambda x: x[1])[:int(len(mses) * use_for_train_fraction)]
-    best_formula_pairs = [x for x in best_formula_pairs if x[1] < inf]
-    best_formula_mses = [x[1] for x in best_formula_pairs]
+    epoch_best = []
+    for epoch in range(1500):
+        reconstructed_formulas, _ = model.sample(n_formulas_to_sample, max_len, 'sample')
+        predicted_ys = my_evaluate_formula.evaluate_file('sample', xs)
+        mses = []
+        inf = 10 ** 4
+        for i in range(len(predicted_ys)):
+            if predicted_ys[i] is None:
+                mses.append(inf)
+            else:
+                mses.append(mean_squared_error(predicted_ys[i], ys))
+        best_formula_pairs = sorted(enumerate(mses), key=lambda x: x[1])[:int(len(mses) * use_for_train_fraction)]
+        best_formula_pairs = [x for x in best_formula_pairs if x[1] < inf]
+        best_formula_mses = [x[1] for x in best_formula_pairs]
+        epoch_best += best_formula_mses
+
+    best_formula_mses = sorted(epoch_best)[:400]
     if np.isfinite(np.mean(best_formula_mses)) and np.isfinite(np.log(np.mean(best_formula_mses))):
         print(f'mean best mses: {np.mean(best_formula_mses)}')
         print(f'mean best mses log : {np.log(np.mean(best_formula_mses))}')
     print(sorted(best_formula_mses))
-    if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
-        print(f'mean mses : {np.mean(mses)}')
-        print(f'mean mses log : {np.log(np.mean(mses))}')
+    # if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
+    #     print(f'mean mses : {np.mean(mses)}')
+    #     print(f'mean mses log : {np.log(np.mean(mses))}')
