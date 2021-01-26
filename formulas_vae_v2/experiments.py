@@ -117,6 +117,7 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
         mses = []
         inf = 10 ** 4
         for i in range(len(predicted_ys)):
+            print(predicted_ys[i])
             if predicted_ys[i] is None:
                 mses.append(inf)
             else:
