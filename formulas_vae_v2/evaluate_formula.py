@@ -33,7 +33,7 @@ def evaluate(formula, xs):
                 stack.append(x)
                 continue
             if token in my_formula_config.COEFFICIENTS:
-                stack.append(token)
+                stack.append(int(token))
                 continue
             if token in my_formula_config.OPERATORS:
                 params_count = my_formula_config.OPERATORS[token]
@@ -64,3 +64,4 @@ def evaluate_file(filename, xs):
 
 if __name__ == '__main__':
     print(evaluate('3 x mult', [2]))
+    print(evaluate('3', [2]))

@@ -130,12 +130,13 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
         best_formula_pairs = [x for x in best_formula_pairs if x[1] < inf]
         best_formula_mses = [x[1] for x in best_formula_pairs]
         epoch_best += best_formula_mses
+        epoch_best = sorted(epoch_best)[:400]
+        print(f'{epoch} mean best mses: {np.mean(best_formula_mses)}')
+        print(f'{epoch} mean best mses log : {np.log(np.mean(best_formula_mses))}')
 
     best_formula_mses = sorted(epoch_best)[:400]
-    if np.isfinite(np.mean(best_formula_mses)) and np.isfinite(np.log(np.mean(best_formula_mses))):
-        print(f'mean best mses: {np.mean(best_formula_mses)}')
-        print(f'mean best mses log : {np.log(np.mean(best_formula_mses))}')
-    print(sorted(best_formula_mses))
+    print(f'mean best mses: {np.mean(best_formula_mses)}')
+    print(f'mean best mses log : {np.log(np.mean(best_formula_mses))}')
     # if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
     #     print(f'mean mses : {np.mean(mses)}')
     #     print(f'mean mses log : {np.log(np.mean(mses))}')
