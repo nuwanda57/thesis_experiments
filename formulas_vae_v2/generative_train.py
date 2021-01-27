@@ -38,11 +38,6 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                 mses.append(inf)
             else:
                 mses.append(mean_squared_error(predicted_ys[i], ys))
-        table = wandb.Table(columns=[f'formula, epoch: {epoch}'])
-        for f in reconstructed_formulas[:20]:
-            table.add_data(f)
-        if (epoch + 1) % 50 == 0:
-            wandb_log[f'example formulas epoch: {epoch}'] = table
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
             wandb_log['log_mean_mse_generated'] = np.log(np.mean(mses))
@@ -66,6 +61,12 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         wandb_log['best_formulas_size'] = len(best_formulas)
         with open(file_to_sample, 'w') as f:
             f.write('\n'.join(best_formulas))
+        table = wandb.Table(columns=[f'formula, epoch: {epoch}'])
+        for f in epoch_best_formulas[:20]:
+            table.add_data(f)
+        if (epoch + 1) % 50 == 0:
+            wandb_log[f'example formulas epoch: {epoch}'] = table
+
         wandb.log(wandb_log)
         if len(best_formulas) == 0:
             print('training terminated')
