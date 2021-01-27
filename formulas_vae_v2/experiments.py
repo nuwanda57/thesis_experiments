@@ -85,13 +85,19 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, recon
                                          n_pretrain_steps, train_batches, valid_batches, xs, ys, formula)
 
 
-def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, max_len, epochs, results_dir,
-        model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005, betas=(0.5, 0.999)):
+def exp_check_no_results(xs, ys, formula, train_file, val_file, test_file, reconstruct_strategy, max_len, epochs,
+                         results_dir, model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005,
+                         betas=(0.5, 0.999)):
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
     training_log_dir = os.path.join(results_dir, 'training/')
     if not os.path.exists(training_log_dir):
         os.mkdir(training_log_dir)
+    wandb.init(project="no result check")
+
+    table = wandb.Table(columns=["correct formula"])
+    table.add_data(formula)
+    wandb.log({'correct formula': table})
 
     vocab = my_vocab.Vocab()
     vocab.build_from_formula_file(train_file)
@@ -105,12 +111,10 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
     n_formulas_to_sample = 2000
-    use_for_train_fraction = 0.2
+    percentile = 20
     for step in range(n_pretrain_steps):
         my_train.run_epoch(vocab, model, optimizer, train_batches, valid_batches, step)
 
-    xs = np.linspace(0.0, 1.0, num=100)
-    ys = 3 * xs
     epoch_best = []
     for epoch in range(1500):
         reconstructed_formulas, _ = model.sample(n_formulas_to_sample, max_len, 'sample')
@@ -127,13 +131,20 @@ def exp_check_no_results(train_file, val_file, test_file, reconstruct_strategy, 
                     print('exception when calculating mse')
                     print(predicted_ys[i][:100])
                     mses.append(inf)
-        best_formula_pairs = sorted(enumerate(mses), key=lambda x: x[1])[:int(len(mses) * use_for_train_fraction)]
-        best_formula_pairs = [x for x in best_formula_pairs if x[1] < inf]
-        best_formula_mses = [x[1] for x in best_formula_pairs]
+        mse_threshold = np.nanpercentile(mses, percentile)
+        epoch_best_formula_pairs = [x for x in enumerate(mses) if x[1] < mse_threshold]
+        best_formula_mses = [x[1] for x in epoch_best_formula_pairs if x[1] < inf]
         epoch_best += best_formula_mses
         epoch_best = sorted(epoch_best)[:400]
         print(f'{epoch} mean best mses: {np.mean(epoch_best)}')
         print(f'{epoch} mean best mses log : {np.log(np.mean(epoch_best))}')
+        wandb_log = {}
+        if np.isfinite(np.mean(epoch_best)) and np.isfinite(np.log(np.mean(epoch_best))):
+            wandb_log['log_mse_top_400'] = np.log(np.mean(epoch_best))
+            wandb_log['log_mse_top_100'] = np.log(np.mean(epoch_best[:100]))
+            wandb_log['log_mse_top_10'] = np.log(np.mean(epoch_best[:10]))
+            wandb_log['log_mse_top_1'] = np.log(np.mean(epoch_best[:1]))
+        wandb.log(wandb_log)
 
     best_formula_mses = sorted(epoch_best)[:400]
     print(f'mean best mses: {np.mean(best_formula_mses)}')
