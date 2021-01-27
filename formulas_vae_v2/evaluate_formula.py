@@ -24,7 +24,7 @@ def apply_operator(operator, params):
 
 
 def evaluate(formula, xs):
-    # formula = formula.split()
+    formula = formula.split()
     results = []
     stack = list()
     for x in xs:
@@ -63,5 +63,5 @@ def evaluate_file(filename, xs):
 
 
 if __name__ == '__main__':
-    # print(evaluate('3 x mult', [2]))
-    print(evaluate(["3","1","x","2","x","pow","pow","mult","add","2","x","pow","pow","mult","add"], [0.5]))
+    print(evaluate('3 x mult', [2]))
+    # print(evaluate(["3","1","x","2","x","pow","pow","mult","add","2","x","pow","pow","mult","add"], [0.5]))
