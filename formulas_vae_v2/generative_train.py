@@ -11,14 +11,12 @@ import wandb
 
 def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
-                     n_pretrain_steps, pretrain_batches, pretrain_val_batches, use_n_last_steps=6):
+                     n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs, ys, formula, use_n_last_steps=6):
     for step in range(n_pretrain_steps):
         my_train.run_epoch(vocab, model, optimizer, pretrain_batches, pretrain_val_batches, step)
 
-    xs = np.linspace(0.0, 1.0, num=100)
-    ys = 3 * xs
     table = wandb.Table(columns=["correct formula"])
-    table.add_data('y = 3x')
+    table.add_data(formula)
     wandb.log({'correct formula': table})
     reconstructed_formulas = []
     best_formulas = []
@@ -41,6 +39,9 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
             wandb_log['log_mean_mse_generated'] = np.log(np.mean(mses))
+        generated_less_inf_mses = [x for x in mses if np.isfinite(x) and x < inf]
+        if np.isfinite(np.mean(generated_less_inf_mses)) and np.isfinite(np.log(np.mean(generated_less_inf_mses))):
+            wandb_log['log_mean_generated_less_inf_mses'] = np.log(np.mean(generated_less_inf_mses))
         mse_threshold = np.nanpercentile(mses + best_mses, percentile)
         epoch_best_formula_pairs = [x for x in enumerate(mses) if x[1] < mse_threshold]
         epoch_best_formula_indices = [x[0] for x in epoch_best_formula_pairs if x[1] < inf]
@@ -70,6 +71,12 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         wandb.log(wandb_log)
         if len(best_formulas) == 0:
             print('training terminated')
+            break
+        if len(best_mses) > 10 and np.mean(best_mses) == 0:
+            print('training terminated, best mses = 0')
+            break
+        if len(epoch_best_mses) > 10 and np.mean(epoch_best_mses) == 0:
+            print('training terminated, epoch best mses = 0')
             break
 
         train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, vocab, batch_size, device)
