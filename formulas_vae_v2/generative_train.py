@@ -25,6 +25,9 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
     best_mses = []
     last_best_sizes = deque([0] * use_n_last_steps, maxlen=use_n_last_steps)
     for epoch in range(epochs):
+        s = last_best_sizes.popleft()
+        best_formulas = best_formulas[s:]
+        best_mses = best_mses[s:]
         wandb_log = {}
         reconstructed_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
         predicted_ys = my_evaluate_formula.evaluate_file(file_to_sample, xs)
@@ -55,15 +58,18 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
             for i, line in enumerate(f.readlines()):
                 if i in epoch_best_formula_indices:
                     epoch_best_formulas.append(line.strip())
-        s = last_best_sizes.popleft()
         last_best_sizes.append(len(epoch_best_formulas))
-        best_formulas = best_formulas[s:] + epoch_best_formulas
-        best_mses = best_mses[s:] + epoch_best_mses
+        best_formulas += epoch_best_formulas
+        best_mses += epoch_best_mses
         if np.isfinite(np.mean(best_mses)) and np.isfinite(np.log(np.mean(best_mses))):
             wandb_log['log_mean_mse_best'] = np.log(np.mean(best_mses))
+        wandb_log['best_formulas_size'] = len(best_formulas)
         with open(file_to_sample, 'w') as f:
-            f.write('\n'.join(epoch_best_formulas))
+            f.write('\n'.join(best_formulas))
         wandb.log(wandb_log)
+        if len(best_formulas) == 0:
+            print('training terminated')
+            break
 
         train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, vocab, batch_size, device)
         my_train.run_epoch(vocab, model, optimizer, train_batches, pretrain_val_batches, epoch)
