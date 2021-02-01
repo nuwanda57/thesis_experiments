@@ -9,6 +9,27 @@ import formulas_vae_v2.batch_builder as my_batch_builder
 import wandb
 
 
+def log_mses_wandb(best_mses, best_formulas, wandb_log, epoch, prefix):
+    wandb_log[f'{prefix}_best_formulas_size'] = len(best_formulas)
+    if np.isfinite(np.mean(best_mses)):
+        wandb_log[f'{prefix}_log_mean_mse_best'] = np.log(np.mean(best_mses))
+        sorted_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
+        sorted_best_mses = [x[0] for x in sorted_best_mses_and_formulas]
+        sorted_best_formulas = [x[1] for x in sorted_best_mses_and_formulas]
+        for count in [1, 10, 25, 50, 100, 200, 400]:
+            if len(sorted_best_mses) < count:
+                continue
+            if np.mean(sorted_best_mses[:count]) != 0:
+                wandb_log[f'{prefix}_log_mean_mse_top_{count}'] = np.log(np.mean(sorted_best_mses[:count]))
+            else:
+                wandb_log[f'{prefix}_log_mean_mse_top_{count}'] = -100
+        if (epoch + 1) % 50 == 0:
+            table = wandb.Table(columns=[f'{prefix}_best formulas, epoch: {epoch}'])
+            for f in sorted_best_formulas[:20]:
+                table.add_data(f)
+            wandb_log[f'{prefix}_example formulas epoch: {epoch}'] = table
+
+
 def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs, ys, formula, use_n_last_steps):
@@ -57,26 +78,14 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         last_best_sizes.append(len(epoch_best_formulas))
         best_formulas += epoch_best_formulas
         best_mses += epoch_best_mses
-        if np.isfinite(np.mean(best_mses)) and np.isfinite(np.log(np.mean(best_mses))):
-            wandb_log['log_mean_mse_best'] = np.log(np.mean(best_mses))
-        wandb_log['best_formulas_size'] = len(best_formulas)
+        log_mses_wandb(best_mses, best_formulas, wandb_log, epoch, f'last_{use_n_last_steps}_epochs')
+        log_mses_wandb(epoch_best_mses, epoch_best_formulas, wandb_log, epoch, f'current_epoch')
         with open(file_to_sample, 'w') as f:
             f.write('\n'.join(best_formulas))
-        table = wandb.Table(columns=[f'formula, epoch: {epoch}'])
-        for f in epoch_best_formulas[:20]:
-            table.add_data(f)
-        if (epoch + 1) % 50 == 0:
-            wandb_log[f'example formulas epoch: {epoch}'] = table
 
         wandb.log(wandb_log)
         if len(best_formulas) == 0:
             print('training terminated')
-            break
-        if len(best_mses) > 10 and np.mean(best_mses) == 0:
-            print('training terminated, best mses = 0')
-            break
-        if len(epoch_best_mses) > 10 and np.mean(epoch_best_mses) == 0:
-            print('training terminated, epoch best mses = 0')
             break
 
         train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, vocab, batch_size, device)
