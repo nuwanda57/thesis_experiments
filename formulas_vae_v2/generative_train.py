@@ -90,8 +90,11 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         sorted_epoch_best_mses = [x[0] for x in sorted_epoch_best_mses_and_formulas]
         sorted_epoch_best_formulas = [x[1] for x in sorted_epoch_best_mses_and_formulas]
 
-        the_very_best_formulas = sorted(the_very_best_formulas + sorted_epoch_best_formulas)[:400]
-        the_very_best_mses = sorted(the_very_best_mses + sorted_epoch_best_mses)[:400]
+        the_very_best_formulas += sorted_epoch_best_formulas
+        the_very_best_mses += sorted_epoch_best_mses
+        the_very_best_mses_and_formulas = sorted(zip(the_very_best_mses, the_very_best_formulas))[:400]
+        the_very_best_mses = [x[0] for x in the_very_best_mses_and_formulas]
+        the_very_best_formulas = [x[1] for x in the_very_best_mses_and_formulas]
 
         log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, f'last_{use_n_last_steps}_epochs')
         log_mses_wandb(sorted_epoch_best_mses, sorted_epoch_best_formulas, wandb_log, epoch, f'current_epoch')
