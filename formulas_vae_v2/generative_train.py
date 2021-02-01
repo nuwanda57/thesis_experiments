@@ -11,7 +11,7 @@ import wandb
 
 def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
-                     n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs, ys, formula, use_n_last_steps=6):
+                     n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs, ys, formula, use_n_last_steps):
     for step in range(n_pretrain_steps):
         my_train.run_epoch(vocab, model, optimizer, pretrain_batches, pretrain_val_batches, step)
 

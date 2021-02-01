@@ -46,7 +46,7 @@ def reconstruct_test_per_epoch(
 
 def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, reconstruct_strategy, max_len, epochs,
                          results_dir, model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005,
-                         betas=(0.5, 0.999)):
+                         betas=(0.5, 0.999), n_formulas_to_sample=2000, percentile=20, use_n_last_steps=6):
     wandb.init(project="generative train")
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
@@ -65,24 +65,13 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, recon
     model = my_model.FormulaVARE(model_params)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
-    n_formulas_to_sample = 2000
-    percentile = 20
-    # wandb_log = {
-    #     'max_len': max_len,
-    #     'epochs': epochs,
-    #     'batch_size': batch_size,
-    #     'learning_rate': lr,
-    #     'n_formulas_sampled': n_formulas_to_sample,
-    #     'chosen_for_train_fraction': use_for_train_fraction,
-    #     'n_pretrain_steps': n_pretrain_steps,
-    # }
     table = wandb.Table(columns=["max_len", "epochs", "batch_size", "learning_rate", "n_formulas_sampled",
                                  "chosen_for_train_fraction", "n_pretrain_steps"])
     table.add_data(max_len, epochs, batch_size, lr, n_formulas_to_sample, percentile, n_pretrain_steps)
     wandb.log({'configs': table})
     my_generative_train.generative_train(model, vocab, optimizer, epochs, device, batch_size,
                                          n_formulas_to_sample, 'sample', max_len, percentile,
-                                         n_pretrain_steps, train_batches, valid_batches, xs, ys, formula)
+                                         n_pretrain_steps, train_batches, valid_batches, xs, ys, formula, use_n_last_steps)
 
 
 def exp_check_no_results(xs, ys, formula, train_file, val_file, test_file, reconstruct_strategy, max_len, epochs,
