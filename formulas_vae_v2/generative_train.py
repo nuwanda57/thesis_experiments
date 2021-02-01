@@ -16,6 +16,7 @@ def log_mses_wandb(best_mses, best_formulas, wandb_log, epoch, prefix):
         sorted_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
         sorted_best_mses = [x[0] for x in sorted_best_mses_and_formulas]
         sorted_best_formulas = [x[1] for x in sorted_best_mses_and_formulas]
+        print(f'{x[0]}: {x[1]}\n' for x in zip(sorted_best_mses[:10], sorted_best_formulas[:10]))
         for count in [1, 10, 25, 50, 100, 200, 400]:
             if len(sorted_best_mses) < count:
                 continue
@@ -75,6 +76,7 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
             for i, line in enumerate(f.readlines()):
                 if i in epoch_best_formula_indices:
                     epoch_best_formulas.append(line.strip())
+        assert len(epoch_best_mses) == len(epoch_best_formulas)
         last_best_sizes.append(len(epoch_best_formulas))
         best_formulas += epoch_best_formulas
         best_mses += epoch_best_mses
