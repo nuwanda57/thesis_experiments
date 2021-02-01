@@ -66,8 +66,8 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, recon
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
     table = wandb.Table(columns=["max_len", "epochs", "batch_size", "learning_rate", "n_formulas_sampled",
-                                 "chosen_for_train_fraction", "n_pretrain_steps"])
-    table.add_data(max_len, epochs, batch_size, lr, n_formulas_to_sample, percentile, n_pretrain_steps)
+                                 "chosen_for_train_fraction", "n_pretrain_steps", "use_n_last_steps"])
+    table.add_data(max_len, epochs, batch_size, lr, n_formulas_to_sample, percentile, n_pretrain_steps, use_n_last_steps)
     wandb.log({'configs': table})
     my_generative_train.generative_train(model, vocab, optimizer, epochs, device, batch_size,
                                          n_formulas_to_sample, 'sample', max_len, percentile,
