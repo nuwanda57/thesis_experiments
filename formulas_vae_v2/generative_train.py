@@ -9,15 +9,10 @@ import formulas_vae_v2.batch_builder as my_batch_builder
 import wandb
 
 
-def log_mses_wandb(best_mses, best_formulas, wandb_log, epoch, prefix):
-    wandb_log[f'{prefix}_best_formulas_size'] = len(best_formulas)
-    if np.isfinite(np.mean(best_mses)):
-        wandb_log[f'{prefix}_log_mean_mse_best'] = np.log(np.mean(best_mses))
-        sorted_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
-        sorted_best_mses = [x[0] for x in sorted_best_mses_and_formulas]
-        sorted_best_formulas = [x[1] for x in sorted_best_mses_and_formulas]
-        print(sorted_best_mses[:10])
-        print(sorted_best_formulas[:10])
+def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, prefix):
+    wandb_log[f'{prefix}_best_formulas_size'] = len(sorted_best_formulas)
+    if np.isfinite(np.mean(sorted_best_mses)):
+        wandb_log[f'{prefix}_log_mean_mse_best'] = np.log(np.mean(sorted_best_mses))
         for count in [1, 10, 25, 50, 100, 200, 400]:
             if len(sorted_best_mses) < count:
                 continue
@@ -45,6 +40,8 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
     best_formulas = []
     best_mses = []
     last_best_sizes = deque([0] * use_n_last_steps, maxlen=use_n_last_steps)
+    the_very_best_mses = []
+    the_very_best_formulas = []
     for epoch in range(epochs):
         s = last_best_sizes.popleft()
         best_formulas = best_formulas[s:]
@@ -81,8 +78,21 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         last_best_sizes.append(len(epoch_best_formulas))
         best_formulas += epoch_best_formulas
         best_mses += epoch_best_mses
-        log_mses_wandb(best_mses, best_formulas, wandb_log, epoch, f'last_{use_n_last_steps}_epochs')
-        log_mses_wandb(epoch_best_mses, epoch_best_formulas, wandb_log, epoch, f'current_epoch')
+
+        sorted_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
+        sorted_best_mses = [x[0] for x in sorted_best_mses_and_formulas]
+        sorted_best_formulas = [x[1] for x in sorted_best_mses_and_formulas]
+
+        sorted_epoch_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
+        sorted_epoch_best_mses = [x[0] for x in sorted_epoch_best_mses_and_formulas]
+        sorted_epoch_best_formulas = [x[1] for x in sorted_epoch_best_mses_and_formulas]
+
+        the_very_best_formulas = sorted(the_very_best_formulas + sorted_epoch_best_formulas)[:400]
+        the_very_best_mses = sorted(the_very_best_mses + sorted_epoch_best_mses)[:400]
+
+        log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, f'last_{use_n_last_steps}_epochs')
+        log_mses_wandb(sorted_epoch_best_mses, sorted_epoch_best_formulas, wandb_log, epoch, f'current_epoch')
+        log_mses_wandb(the_very_best_mses, the_very_best_formulas, wandb_log, epoch, f'the_very_best')
         with open(file_to_sample, 'w') as f:
             f.write('\n'.join(best_formulas))
 
