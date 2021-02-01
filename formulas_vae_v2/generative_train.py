@@ -16,7 +16,8 @@ def log_mses_wandb(best_mses, best_formulas, wandb_log, epoch, prefix):
         sorted_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
         sorted_best_mses = [x[0] for x in sorted_best_mses_and_formulas]
         sorted_best_formulas = [x[1] for x in sorted_best_mses_and_formulas]
-        print(f'{x[0]}: {x[1]}\n' for x in zip(sorted_best_mses[:10], sorted_best_formulas[:10]))
+        print(sorted_best_mses[:10])
+        print(sorted_best_formulas[:10])
         for count in [1, 10, 25, 50, 100, 200, 400]:
             if len(sorted_best_mses) < count:
                 continue
@@ -66,7 +67,7 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
             wandb_log['log_mean_generated_less_inf_mses'] = np.log(np.mean(generated_less_inf_mses))
         mse_threshold = np.nanpercentile(mses + best_mses, percentile)
         epoch_best_formula_pairs = [x for x in enumerate(mses) if x[1] < mse_threshold]
-        epoch_best_formula_indices = [x[0] for x in epoch_best_formula_pairs if x[1] < inf]
+        epoch_best_formula_indices = set([x[0] for x in epoch_best_formula_pairs if x[1] < inf])
         epoch_best_mses = [x[1] for x in epoch_best_formula_pairs if x[1] < inf]
         print(f'epoch: {epoch}, mean best mses: {np.mean(epoch_best_mses)}')
         if np.isfinite(np.mean(epoch_best_mses)) and np.isfinite(np.log(np.mean(epoch_best_mses))):
