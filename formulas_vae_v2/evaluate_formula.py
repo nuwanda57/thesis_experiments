@@ -63,5 +63,11 @@ def evaluate_file(filename, xs):
 
 
 if __name__ == '__main__':
-    print(evaluate('3 x mult', [2]))
+    import numpy as np
+    from sklearn.metrics import mean_squared_error
+    # print(evaluate('3 x mult', [2]))
+    xs = np.linspace(0.0, 1.0, num=100)
+    a = evaluate('0 1 x mult add 27 x 0 pow pow pow x x 3 pow mult add 0 x 7 pow mult add', xs)
+    print(a)
+    print(np.max(abs(3 * xs - a)))
     # print(evaluate(["3","1","x","2","x","pow","pow","mult","add","2","x","pow","pow","mult","add"], [0.5]))

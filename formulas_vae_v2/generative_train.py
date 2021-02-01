@@ -32,7 +32,8 @@ def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, pre
 
 def generative_train(model, vocab, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
-                     n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs, ys, formula, use_n_last_steps):
+                     n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
+                     ys, formula, use_n_last_steps, do_sample_unique):
     for step in range(n_pretrain_steps):
         my_train.run_epoch(vocab, model, optimizer, pretrain_batches, pretrain_val_batches, step)
 
@@ -50,7 +51,13 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
         best_formulas = best_formulas[s:]
         best_mses = best_mses[s:]
         wandb_log = {}
-        reconstructed_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
+        if do_sample_unique:
+            reconstructed_formulas, sampled_count_unique = model.sample_unique(
+                n_formulas_to_sample, max_length, file_to_sample)
+            wandb_log['sampled_unique_count'] = sampled_count_unique
+        else:
+            reconstructed_formulas, _ = model.sample(
+                n_formulas_to_sample, max_length, file_to_sample)
         predicted_ys = my_evaluate_formula.evaluate_file(file_to_sample, xs)
         mses = []
         inf = 10 ** 4

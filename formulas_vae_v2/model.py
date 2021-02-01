@@ -183,6 +183,15 @@ class FormulaVARE(nn.Module):
 
         return reconstructed_formulas, zs
 
+    def sample_unique(self, n_formulas, max_len, out_file=None):
+        zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
+        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
+        reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+        reconstructed_formulas = np.unique(reconstructed_formulas)
+        self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+
+        return reconstructed_formulas, len(reconstructed_formulas)
+
     def _reset_parameters(self):
         for p in self.parameters():
             if p.dim() > 1:

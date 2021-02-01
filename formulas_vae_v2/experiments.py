@@ -46,7 +46,8 @@ def reconstruct_test_per_epoch(
 
 def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, reconstruct_strategy, max_len, epochs,
                          results_dir, model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005,
-                         betas=(0.5, 0.999), n_formulas_to_sample=2000, percentile=20, use_n_last_steps=6):
+                         betas=(0.5, 0.999), n_formulas_to_sample=2000, percentile=20, use_n_last_steps=6,
+                         do_sample_unique=False):
     wandb.init(project="generative train")
     if not os.path.exists(results_dir):
         os.mkdir(results_dir)
@@ -71,7 +72,8 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, recon
     wandb.log({'configs': table})
     my_generative_train.generative_train(model, vocab, optimizer, epochs, device, batch_size,
                                          n_formulas_to_sample, 'sample', max_len, percentile,
-                                         n_pretrain_steps, train_batches, valid_batches, xs, ys, formula, use_n_last_steps)
+                                         n_pretrain_steps, train_batches, valid_batches, xs, ys,
+                                         formula, use_n_last_steps, do_sample_unique)
 
 
 def exp_check_no_results(xs, ys, formula, train_file, val_file, test_file, reconstruct_strategy, max_len, epochs,
