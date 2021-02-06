@@ -14,7 +14,7 @@ def evaluate_file(filename, xs):
     formulas = []
     with open(filename) as f:
         for line in f:
-            formulas.append(my_formula_utils.get_formula_representation(line.strip()))
+            formulas.append(my_formula_utils.get_formula_representation(line.strip().split()))
     results = []
     for formula in formulas:
         results.append(evaluate(formula, xs))

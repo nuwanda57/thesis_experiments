@@ -27,7 +27,7 @@ def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, pre
         if (epoch + 1) % 50 == 0:
             table = wandb.Table(columns=[f'{prefix}_best formulas, epoch: {epoch}'])
             for f in sorted_best_formulas[:20]:
-                table.add_data(my_formula_utils.get_formula_representation(f))
+                table.add_data(my_formula_utils.get_formula_representation(f.split()))
             wandb_log[f'{prefix}_example formulas epoch: {epoch}'] = table
 
 

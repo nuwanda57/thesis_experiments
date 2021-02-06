@@ -21,10 +21,7 @@ def maybe_get_valid(polish_formula):
     return None
 
 
-def get_formula_representation(valid_polish_formula_):
-    valid_polish_formula = valid_polish_formula_
-    if isinstance(valid_polish_formula, str):
-        valid_polish_formula = valid_polish_formula.split()
+def get_formula_representation(valid_polish_formula):
     if len(valid_polish_formula) == 0:
         return ''
     stack = deque(valid_polish_formula)
