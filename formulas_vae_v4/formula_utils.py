@@ -10,11 +10,13 @@ def maybe_get_valid(polish_formula):
         if token in my_formula_config.OPERATORS:
             valid_polish_formula.append(token)
             numbers_required += (my_formula_config.OPERATORS[token].arity - 1)
-        else:
+        elif token in my_formula_config.VARIABLES:
             valid_polish_formula.append(token)
             numbers_required -= 1
             if numbers_required == 0:
                 return valid_polish_formula
+        else:
+            continue
     return None
 
 
