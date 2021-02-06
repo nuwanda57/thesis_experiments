@@ -111,7 +111,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
             break
 
         train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, batch_size, device)
-        my_train.run_epoch(model, optimizer, train_batches, pretrain_val_batches, epoch)
+        my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch)
     table = wandb.Table(columns=['formula'])
     for f in reconstructed_formulas[:1000]:
         table.add_data(f)
