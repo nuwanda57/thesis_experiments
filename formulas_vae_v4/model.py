@@ -193,7 +193,8 @@ class FormulaVARE(nn.Module):
 
         if unique:
             reconstructed_formulas = np.unique(reconstructed_formulas)
-        self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+        print(reconstructed_formulas)
+        self.maybe_write_formulas([' '.join(f) for f in reconstructed_formulas], zs, out_file)
 
         return reconstructed_formulas, zs
 
