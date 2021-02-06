@@ -54,6 +54,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         wandb_log = {}
         reconstructed_formulas, _ = model.sample(
                 n_formulas_to_sample, max_length, file_to_sample)
+        print(reconstructed_formulas)
         predicted_ys = my_evaluate_formula.evaluate_file(file_to_sample, xs)
         mses = []
         inf = 10 ** 4
