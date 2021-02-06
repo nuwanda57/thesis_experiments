@@ -7,16 +7,17 @@ def maybe_get_valid(polish_formula):
     numbers_required = 1
     valid_polish_formula = []
     for token in polish_formula:
+        if token in {my_formula_config.START_OF_SEQUENCE, my_formula_config.END_OF_SEQUENCE,
+                     my_formula_config.PADDING, my_formula_config.NUMBER_SYMBOL}:
+            continue
         if token in my_formula_config.OPERATORS:
             valid_polish_formula.append(token)
             numbers_required += (my_formula_config.OPERATORS[token].arity - 1)
-        elif token in my_formula_config.VARIABLES:
+        else:
             valid_polish_formula.append(token)
             numbers_required -= 1
             if numbers_required == 0:
                 return valid_polish_formula
-        else:
-            continue
     return None
 
 
@@ -56,3 +57,4 @@ if __name__ == '__main__':
            == ['mult', 'add', 'sin', '5', 'cos', '6', 'add', '4', '3']
 
     print(get_formula_representation(['mult', 'add', '1', 'x', 'add', 'sin', '5', 'cos', '6']))
+    print(get_formula_representation('sin sin sin x'.split()))
