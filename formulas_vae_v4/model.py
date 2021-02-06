@@ -5,7 +5,7 @@ import numpy as np
 
 from collections import namedtuple
 
-import formulas_vae_v2.formula_utils as my_formula_utils
+import formulas_vae_v4.formula_utils as my_formula_utils
 
 
 ModelParams = namedtuple('ModelParams', [
@@ -69,6 +69,9 @@ class FormulaVARE(nn.Module):
 
     # z - latent representation
     def decode(self, x, z, hidden=None):
+        """
+        Latent into logits
+        """
         # x: (formula_len, batch_size)
         z_emb = self.z_to_embedding(z)
         x = self.embedding(x)
@@ -125,9 +128,6 @@ class FormulaVARE(nn.Module):
         reconstructed_formulas = [
             f[:f.index(self.vocab.eos_token)] if self.vocab.eos_token in f else f for f in reconstructed_formulas]
 
-        for i in range(len(reconstructed_formulas)):
-            reconstructed_formulas[i] = my_formula_utils.unify_tokens_into_numbers(reconstructed_formulas[i])
-
         return reconstructed_formulas
 
     def maybe_write_formulas(self, reconstructed_formulas, zs, out_file=None):
@@ -135,7 +135,7 @@ class FormulaVARE(nn.Module):
             with open(out_file, 'w') as f:
                 for formula in reconstructed_formulas:
                     f.write(' '.join(formula) + '\n')
-            with open(out_file + 'z', 'w') as f:
+            with open(f'{out_file}z', 'w') as f:
                 for zi in zs:
                     for zi_k in zi:
                         f.write('%f ' % zi_k)
@@ -175,22 +175,24 @@ class FormulaVARE(nn.Module):
                 formulas.append(f)
         return formulas
 
-    def sample(self, n_formulas, max_len, out_file=None):
+    def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True):
         zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
         encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+
+        if ensure_valid:
+            valid_formulas = []
+            for f in reconstructed_formulas:
+                maybe_valid = my_formula_utils.maybe_get_valid(f)
+                if maybe_valid is not None:
+                    valid_formulas.append(maybe_valid)
+            reconstructed_formulas = valid_formulas
+
+        if unique:
+            reconstructed_formulas = np.unique(reconstructed_formulas)
         self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
 
         return reconstructed_formulas, zs
-
-    def sample_unique(self, n_formulas, max_len, out_file=None):
-        zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
-        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
-        reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
-        reconstructed_formulas = np.unique(reconstructed_formulas)
-        self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
-
-        return reconstructed_formulas, len(reconstructed_formulas)
 
     def _reset_parameters(self):
         for p in self.parameters():

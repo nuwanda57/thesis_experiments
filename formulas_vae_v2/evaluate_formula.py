@@ -66,8 +66,8 @@ if __name__ == '__main__':
     import numpy as np
     from sklearn.metrics import mean_squared_error
     # print(evaluate('3 x mult', [2]))
-    xs = np.linspace(0.0, 1.0, num=100)
-    a = evaluate('0 1 x mult add 27 x 0 pow pow pow x x 3 pow mult add 0 x 7 pow mult add', xs)
+    xs = np.linspace(0.0, 3.0, num=100)
+    a = evaluate('0 x x mult add x x mult add 2 x mult add 3 x mult add 2 x mult add 1 x mult add 4 x 4 pow mult add 2 x 4 pow mult add', xs)
     print(a)
-    print(np.max(abs(3 * xs - a)))
+    print(np.log(mean_squared_error(29 * xs + 4 * xs ** 4, a)))
     # print(evaluate(["3","1","x","2","x","pow","pow","mult","add","2","x","pow","pow","mult","add"], [0.5]))
