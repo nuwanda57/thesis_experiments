@@ -7,7 +7,6 @@ import numpy as np
 
 def evaluate(formula, xs):
     formula = formula.replace('x', 'xs')
-    print(formula)
     return eval(formula)
 
 

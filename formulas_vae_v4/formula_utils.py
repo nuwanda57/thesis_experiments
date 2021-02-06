@@ -59,12 +59,12 @@ if __name__ == '__main__':
     assert maybe_get_valid(['mult', 'add', 'sin', '5', 'cos', '6', 'add', '4', '3', 'add', '3', '1']) \
            == ['mult', 'add', 'sin', '5', 'cos', '6', 'add', '4', '3']
 
-    print(get_formula_representation(['mult', 'add', '1', 'x', 'add', 'sin', '5', 'cos', '6']))
-    print(get_formula_representation('sin sin sin x'.split()))
-
-    print(get_formula_representation('mult mult x x mult x x'.split()))
-    print(get_formula_representation('mult mult x x mult x x'.split()))
-    print(get_formula_representation('mult mult x x mult x x'.split()))
-    print(get_formula_representation('mult mult x x mult x x'.split()))
-    print(get_formula_representation('mult mult x x mult x x'.split()))
-    print(get_formula_representation('mult mult x x mult x x'.split()))
+    # print(get_formula_representation(['mult', 'add', '1', 'x', 'add', 'sin', '5', 'cos', '6']))
+    # print(get_formula_representation('sin sin sin x'.split()))
+    #
+    # print(get_formula_representation('mult mult x x mult x x'.split()))
+    # print(get_formula_representation('mult mult x x mult x x'.split()))
+    # print(get_formula_representation('mult mult x x mult x x'.split()))
+    # print(get_formula_representation('mult mult x x mult x x'.split()))
+    # print(get_formula_representation('mult mult x x mult x x'.split()))
+    # print(get_formula_representation('mult mult x x mult x x'.split()))
