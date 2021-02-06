@@ -35,7 +35,7 @@ def get_formula_representation(valid_polish_formula):
         else:
             args.appendleft(token)
 
-    assert len(args) == 1
+    assert len(args) == 1, f"{args}, {valid_polish_formula}"
     return args.pop()
 
 
@@ -58,3 +58,10 @@ if __name__ == '__main__':
 
     print(get_formula_representation(['mult', 'add', '1', 'x', 'add', 'sin', '5', 'cos', '6']))
     print(get_formula_representation('sin sin sin x'.split()))
+
+    print(get_formula_representation('mult mult x x mult x x'.split()))
+    print(get_formula_representation('mult mult x x mult x x'.split()))
+    print(get_formula_representation('mult mult x x mult x x'.split()))
+    print(get_formula_representation('mult mult x x mult x x'.split()))
+    print(get_formula_representation('mult mult x x mult x x'.split()))
+    print(get_formula_representation('mult mult x x mult x x'.split()))
