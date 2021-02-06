@@ -17,7 +17,7 @@ import wandb
 
 def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, reconstruct_strategy, max_len, epochs,
                          results_dir, model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005,
-                         betas=(0.5, 0.999), n_formulas_to_sample=20000, percentile=20, use_n_last_steps=6,
+                         betas=(0.5, 0.999), n_formulas_to_sample=200000, percentile=20, use_n_last_steps=6,
                          do_sample_unique=False):
     wandb.init(project="generative train no constants")
     if not os.path.exists(results_dir):
