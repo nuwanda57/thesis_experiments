@@ -39,7 +39,7 @@ class FormulaVARE(nn.Module):
 
         self.device = model_params.device
 
-        self._reset_parameters()
+        # self._reset_parameters()
 
     @staticmethod
     def sample_z(mu, logsigma):
