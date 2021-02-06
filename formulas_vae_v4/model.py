@@ -6,11 +6,12 @@ import numpy as np
 from collections import namedtuple
 
 import formulas_vae_v4.formula_utils as my_formula_utils
+import formulas_vae_v4.formula_config as my_formula_config
 
 
 ModelParams = namedtuple('ModelParams', [
     'vocab_size', 'token_embedding_dim', 'hidden_dim', 'encoder_layers_cnt', 'decoder_layers_cnt',
-    'latent_dim', 'vocab', 'device'])
+    'latent_dim', 'device'])
 ModelParams.__new__.__defaults__ = (None,) * len(ModelParams._fields)
 
 
@@ -36,7 +37,6 @@ class FormulaVARE(nn.Module):
         self.latent_dim = model_params.latent_dim
         self.hidden_dim = model_params.hidden_dim
 
-        self.vocab = model_params.vocab
         self.device = model_params.device
 
         self._reset_parameters()
@@ -124,9 +124,10 @@ class FormulaVARE(nn.Module):
     def reconstructed_formulas_from_encoded_formulas(self, encoded_formulas):
         reconstructed_formulas = []
         for e_formula in encoded_formulas:
-            reconstructed_formulas.append([self.vocab.index_to_token[id] for id in e_formula[1:]])
+            reconstructed_formulas.append([my_formula_config.INDEX_TO_TOKEN[id] for id in e_formula[1:]])
         reconstructed_formulas = [
-            f[:f.index(self.vocab.eos_token)] if self.vocab.eos_token in f else f for f in reconstructed_formulas]
+            f[:f.index(my_formula_config.END_OF_SEQUENCE)] \
+                if my_formula_config.END_OF_SEQUENCE in f else f for f in reconstructed_formulas]
 
         return reconstructed_formulas
 
@@ -155,7 +156,8 @@ class FormulaVARE(nn.Module):
     def _reconstruct_encoded_formulas_from_latent(self, zs, max_len):
         formulas = []
         # z: (z_in_batch, latent_dim)
-        x = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(self.vocab.sos_token_index)
+        x = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(
+            my_formula_config.TOKEN_TO_INDEX[my_formula_config.START_OF_SEQUENCE])
         # x: (1, z_in_batch)
         hidden = None
         for i in range(max_len):
