@@ -31,7 +31,7 @@ def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, pre
             wandb_log[f'{prefix}_example formulas epoch: {epoch}'] = table
 
 
-def generative_train(model, vocab, optimizer, epochs, device, batch_size,
+def generative_train(model, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
                      ys, formula, use_n_last_steps, do_sample_unique):
@@ -110,8 +110,8 @@ def generative_train(model, vocab, optimizer, epochs, device, batch_size,
             print('training terminated')
             break
 
-        train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, vocab, batch_size, device)
-        my_train.run_epoch(vocab, model, optimizer, train_batches, pretrain_val_batches, epoch)
+        train_batches, _ = my_batch_builder.build_ordered_batches(file_to_sample, batch_size, device)
+        my_train.run_epoch(model, optimizer, train_batches, pretrain_val_batches, epoch)
     table = wandb.Table(columns=['formula'])
     for f in reconstructed_formulas[:1000]:
         table.add_data(f)
