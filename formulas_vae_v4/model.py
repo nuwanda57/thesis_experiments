@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 
 import numpy as np
+import random
 
 from collections import namedtuple
 
@@ -153,7 +154,7 @@ class FormulaVARE(nn.Module):
 
         return reconstructed_formulas, zs
 
-    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len):
+    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len, explore=False, eps=0.2):
         formulas = []
         # z: (z_in_batch, latent_dim)
         x = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(
