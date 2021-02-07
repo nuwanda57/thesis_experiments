@@ -3,12 +3,13 @@ from formulas_vae_v4 import formula_utils as my_formula_utils
 
 
 import numpy as np
+import numbers
 
 
 def evaluate(formula, xs):
     formula = formula.replace('x', 'xs')
     res = eval(formula)
-    if res.isnumeric():
+    if isinstance(res, numbers.Number):
         res = [res] * len(xs)
     return res
 
