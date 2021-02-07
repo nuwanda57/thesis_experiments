@@ -62,6 +62,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
             if predicted_ys[i] is None:
                 mses.append(inf)
             else:
+                print(predicted_ys[i])
                 mses.append(mean_squared_error(predicted_ys[i], ys))
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
