@@ -72,8 +72,8 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         if np.isfinite(np.mean(generated_less_inf_mses)) and np.isfinite(np.log(np.mean(generated_less_inf_mses))):
             wandb_log['log_mean_generated_less_inf_mses'] = np.log(np.mean(generated_less_inf_mses))
         the_percentile = percentile
-        if len(mses) + len(best_mses) < 200:
-            the_percentile = 90
+        # if len(mses) + len(best_mses) < 200:
+        #     the_percentile = 90
         mse_threshold = np.nanpercentile(mses + best_mses, the_percentile)
         epoch_best_formula_pairs = [x for x in enumerate(mses) if x[1] < mse_threshold]
         epoch_best_formula_indices = set([x[0] for x in epoch_best_formula_pairs if x[1] < inf])

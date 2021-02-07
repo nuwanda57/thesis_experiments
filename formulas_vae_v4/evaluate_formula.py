@@ -26,5 +26,11 @@ def evaluate_file(filename, xs):
 
 
 if __name__ == '__main__':
-    xs = np.linspace(0.0, 3.0, num=100)
+    xs = np.linspace(0.0, 2.0, num=100)
     print(evaluate('((1) + (x)) * ((np.sin(5)) + (np.cos(6)))', xs))
+    print(evaluate('(((np.sin(((np.cos(2)) + (x)) - ((1) * (np.cos(2))))) - (np.sin(3))) + (np.sin(3))) * (x)', xs))
+    print(evaluate('x * np.sin(x)', xs))
+    from sklearn.metrics import mean_squared_error
+    print(mean_squared_error(
+        evaluate('x * np.sin(x)', xs),
+        evaluate('(((np.sin(((np.cos(2)) + (x)) - ((1) * (np.cos(2))))) - (np.sin(3))) + (np.sin(3))) * (x)', xs)))
