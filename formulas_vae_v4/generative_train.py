@@ -35,8 +35,8 @@ def generative_train(model, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
                      ys, formula, use_n_last_steps, do_sample_unique):
-    # for step in range(n_pretrain_steps):
-    #     my_train.run_epoch(vocab, model, optimizer, pretrain_batches, pretrain_val_batches, step)
+    for step in range(n_pretrain_steps):
+        my_train.run_epoch(vocab, model, optimizer, pretrain_batches, pretrain_val_batches, step)
 
     table = wandb.Table(columns=["correct formula"])
     table.add_data(formula)
@@ -62,7 +62,6 @@ def generative_train(model, optimizer, epochs, device, batch_size,
             if predicted_ys[i] is None:
                 mses.append(inf)
             else:
-                print(predicted_ys[i])
                 mses.append(mean_squared_error(predicted_ys[i], ys))
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):

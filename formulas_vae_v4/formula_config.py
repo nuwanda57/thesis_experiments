@@ -6,7 +6,9 @@ END_OF_SEQUENCE = 'eos'
 PADDING = 'pad'
 NUMBER_SYMBOL = 'n'
 VARIABLES = {'x'}
-NUMBERS = {'1', '2', '3', '4', '5'}
+NUMBERS = {
+    '1', '2', '3',
+}
 
 
 class Operator:
