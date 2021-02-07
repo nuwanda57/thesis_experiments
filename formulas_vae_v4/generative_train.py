@@ -36,7 +36,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
                      ys, formula, use_n_last_steps, do_sample_unique):
     for step in range(n_pretrain_steps):
-        my_train.run_epoch(vocab, model, optimizer, pretrain_batches, pretrain_val_batches, step)
+        my_train.run_epoch(model, optimizer, pretrain_batches, pretrain_val_batches, step)
 
     table = wandb.Table(columns=["correct formula"])
     table.add_data(formula)
