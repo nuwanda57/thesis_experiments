@@ -7,7 +7,10 @@ import numpy as np
 
 def evaluate(formula, xs):
     formula = formula.replace('x', 'xs')
-    return eval(formula)
+    res = eval(formula)
+    if res.isnumeric():
+        res = [res] * len(xs)
+    return res
 
 
 def evaluate_file(filename, xs):
