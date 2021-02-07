@@ -9,6 +9,8 @@ import formulas_vae_v4.batch_builder as my_batch_builder
 
 import wandb
 
+import torch
+
 
 def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, prefix):
     wandb_log[f'{prefix}_best_formulas_size'] = len(sorted_best_formulas)

@@ -18,7 +18,6 @@ def generate_formula(all_tokens, service_tokens, max_len):
                 tokens_required -= 1
             if tokens_required == 0:
                 return ' '.join(formula)
-        print(formula)
 
 
 def generate_pretrain_dataset(size, max_len, file=None):

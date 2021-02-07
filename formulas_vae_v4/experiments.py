@@ -27,8 +27,8 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, recon
         os.mkdir(training_log_dir)
 
     device = torch.device('cuda')
-    # train_batches, _ = my_batch_builder.build_ordered_batches(train_file, batch_size, device)
-    # valid_batches, _ = my_batch_builder.build_ordered_batches(val_file, batch_size, device)
+    train_batches, _ = my_batch_builder.build_ordered_batches(train_file, batch_size, device)
+    valid_batches, _ = my_batch_builder.build_ordered_batches(val_file, batch_size, device)
 
     model_params = my_model.ModelParams(vocab_size=len(my_formula_config.INDEX_TO_TOKEN), device=device, **model_conf_params)
     model = my_model.FormulaVARE(model_params)
