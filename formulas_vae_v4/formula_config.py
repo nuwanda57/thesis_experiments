@@ -6,6 +6,7 @@ END_OF_SEQUENCE = 'eos'
 PADDING = 'pad'
 NUMBER_SYMBOL = 'n'
 VARIABLES = {'x'}
+NUMBERS = {'1', '2', '3', '4', '5'}
 
 
 class Operator:
@@ -29,6 +30,9 @@ OPERATORS = {
     'mult': Operator(2, 'mult',
                      lambda params: params[0] * params[1],
                      lambda params: f"({params[0]}) * ({params[1]})"),
+    'sub': Operator(2, 'sub',
+                     lambda params: params[0] - params[1],
+                     lambda params: f"({params[0]}) - ({params[1]})"),
 }
 
 INDEX_TO_TOKEN = [
@@ -36,6 +40,7 @@ INDEX_TO_TOKEN = [
     END_OF_SEQUENCE,
     PADDING,
     NUMBER_SYMBOL,
+    *NUMBERS,
     *VARIABLES,
     *OPERATORS.keys(),
 ]
