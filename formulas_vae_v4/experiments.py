@@ -40,5 +40,5 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, test_file, recon
     wandb.log({'configs': table})
     my_generative_train.generative_train(model, optimizer, epochs, device, batch_size,
                                          n_formulas_to_sample, 'sample', max_len, percentile,
-                                         n_pretrain_steps, None, None, xs, ys,
+                                         n_pretrain_steps, train_batches, valid_batches, xs, ys,
                                          formula, use_n_last_steps, do_sample_unique)
