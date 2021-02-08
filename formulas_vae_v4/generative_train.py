@@ -105,6 +105,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         sampled_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
         sampled_formulas = [' '.join(f) for f in sampled_formulas]
         mses, ress, coeffs, optimized_formulas = my_evaluate_formula.evaluate_file(file_to_sample, xs, ys)
+        print(mses[0], optimized_formulas[0], sampled_formulas[0])
         stats.save_best_samples(sampled_mses=mses, sampled_formulas=sampled_formulas, wandb_log=wandb_log, epoch=epoch)
 
         stats.write_last_n_to_file(retrain_file)
@@ -112,3 +113,4 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         monitoring.log(wandb_log)
         train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device)
         my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch)
+        break
