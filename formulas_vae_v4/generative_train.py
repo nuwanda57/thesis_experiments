@@ -113,4 +113,3 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         monitoring.log(wandb_log)
         train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device)
         my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch)
-        break
