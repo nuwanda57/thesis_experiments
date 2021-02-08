@@ -4,7 +4,7 @@ import numpy as np
 START_OF_SEQUENCE = 'sos'
 END_OF_SEQUENCE = 'eos'
 PADDING = 'pad'
-NUMBER_SYMBOL = 'n'
+NUMBER_SYMBOL = '<n>'
 VARIABLES = {'x'}
 NUMBERS = {
     '1', '2', '3',
