@@ -1,6 +1,9 @@
 import numpy as np
 
 
+INF = 10 ** 4
+
+
 START_OF_SEQUENCE = 'sos'
 END_OF_SEQUENCE = 'eos'
 PADDING = 'pad'
@@ -32,9 +35,6 @@ OPERATORS = {
     'mult': Operator(2, 'mult',
                      lambda params: params[0] * params[1],
                      lambda params: f"({params[0]}) * ({params[1]})"),
-    'sub': Operator(2, 'sub',
-                     lambda params: params[0] - params[1],
-                     lambda params: f"({params[0]}) - ({params[1]})"),
 }
 
 INDEX_TO_TOKEN = [

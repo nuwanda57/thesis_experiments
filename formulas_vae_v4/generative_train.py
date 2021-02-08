@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.metrics import mean_squared_error
 from collections import deque
 
 import formulas_vae_v4.train as my_train
@@ -9,7 +8,10 @@ import formulas_vae_v4.batch_builder as my_batch_builder
 
 import wandb
 
-import torch
+
+def _pretrain(n_pretrain_steps, model, optimizer, pretrain_batches, pretrain_val_batches):
+    for step in range(n_pretrain_steps):
+        my_train.run_epoch(model, optimizer, pretrain_batches, pretrain_val_batches, step)
 
 
 def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, prefix):
@@ -27,92 +29,79 @@ def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, pre
             else:
                 wandb_log[f'{prefix}_log_mean_mse_top_{count}'] = -100
         if (epoch + 1) % 50 == 0:
-            table = wandb.Table(columns=[f'{prefix}_best formulas, epoch: {epoch}'])
-            for f in sorted_best_formulas[:20]:
-                table.add_data(my_formula_utils.get_formula_representation(f.split()))
+            table = wandb.Table(columns=[f'{prefix}_best formulas, epoch: {epoch}', 'mse'])
+            for f, m in zip(sorted_best_formulas[:20], sorted_best_mses[:20]):
+                table.add_data(my_formula_utils.get_formula_representation(f.split()), m)
             wandb_log[f'{prefix}_example formulas epoch: {epoch}'] = table
+
+
+class Statistics:
+    def __init__(self, use_n_last_steps, percentile):
+        self.reconstructed_formulas = []
+        self.last_n_best_formulas = []
+        self.last_n_best_mses = []
+        self.last_n_best_sizes = deque([0] * use_n_last_steps, maxlen=use_n_last_steps)
+        self.the_best_formulas = []
+        self.the_best_mses = []
+        self.percentile = percentile
+
+    def clear_the_oldest_step(self):
+        s = self.last_n_best_sizes.popleft()
+        self.last_n_best_formulas = self.last_n_best_formulas[s:]
+        self.last_n_best_mses = self.last_n_best_mses[s:]
+
+    def save_best_samples(self, sampled_mses, sampled_formulas, wandb_log, epoch):
+        mse_threshold = np.nanpercentile(sampled_mses + self.last_n_best_mses, self.percentile)
+        epoch_best_mses = [x for x in sampled_mses if x < mse_threshold]
+        epoch_best_formulas = [
+            sampled_formulas[i] for i in range(len(sampled_formulas)) if sampled_mses[i] < mse_threshold]
+        assert len(epoch_best_mses) == len(epoch_best_formulas)
+        wandb_log['mean_mse_sampled'] = np.mean(sampled_mses)
+        wandb_log[f'mean_mse_sampled_{self.percentile}_percentile'] = np.mean(epoch_best_mses)
+        wandb_log['formulas_sampled_count'] = len(sampled_mses)
+        wandb_log[f'formulas_sampled_{self.percentile}_percentile_count'] = len(epoch_best_mses)
+
+        self.last_n_best_sizes.append(len(epoch_best_formulas))
+        self.last_n_best_mses += epoch_best_mses
+        self.last_n_best_formulas += epoch_best_formulas
+        self._update_the_best_formulas(epoch_best_formulas=epoch_best_formulas, epoch_best_mses=epoch_best_mses)
+        log_mses_wandb(self.the_best_mses, self.the_best_formulas, wandb_log, epoch, 'the_best')
+
+        sorted_epoch_best_pairs = sorted(zip(epoch_best_mses, epoch_best_formulas))
+        sorted_epoch_best_formulas = [x[1] for x in sorted_epoch_best_pairs]
+        sorted_epoch_best_mses = [x[0] for x in sorted_epoch_best_pairs]
+        log_mses_wandb(sorted_epoch_best_mses, sorted_epoch_best_formulas, wandb_log, epoch, 'the_best')
+
+    def _update_the_best_formulas(self, epoch_best_formulas, epoch_best_mses):
+        self.the_best_formulas += epoch_best_formulas
+        self.the_best_mses += epoch_best_mses
+
+        the_best_pairs = np.unique(sorted(zip(self.the_best_mses, self.the_best_formulas)), axis=0)[:100]
+        self.the_best_formulas = [x[1] for x in the_best_pairs]
+        self.the_best_mses = [x[0] for x in the_best_pairs]
+
+    def write_last_n_to_file(self, filename):
+        with open(filename, 'w') as f:
+            f.write('\n'.join(self.last_n_best_formulas))
 
 
 def generative_train(model, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
-                     ys, formula, use_n_last_steps, do_sample_unique):
-    for step in range(n_pretrain_steps):
-        my_train.run_epoch(model, optimizer, pretrain_batches, pretrain_val_batches, step)
+                     ys, formula, use_n_last_steps, monitoring):
+    _pretrain(n_pretrain_steps, model, optimizer, pretrain_batches, pretrain_val_batches)
 
-    table = wandb.Table(columns=["correct formula"])
-    table.add_data(formula)
-    wandb.log({'correct formula': table})
-    reconstructed_formulas = []
-    best_formulas = []
-    best_mses = []
-    last_best_sizes = deque([0] * use_n_last_steps, maxlen=use_n_last_steps)
-    the_very_best_mses = []
-    the_very_best_formulas = []
-    inf = 10 ** 4
+    retrain_file = f'{file_to_sample}-train'
+    stats = Statistics(use_n_last_steps=use_n_last_steps, percentile=percentile)
     for epoch in range(epochs):
-        s = last_best_sizes.popleft()
-        best_formulas = best_formulas[s:]
-        best_mses = best_mses[s:]
         wandb_log = {}
-        reconstructed_formulas, _ = model.sample(
-                n_formulas_to_sample, max_length, file_to_sample)
-        # print(reconstructed_formulas)
+        stats.clear_the_oldest_step()
+        sampled_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
         mses, ress, coeffs, optimized_formulas = my_evaluate_formula.evaluate_file(file_to_sample, xs, ys)
-        print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
-        if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
-            wandb_log['log_mean_mse_generated'] = np.log(np.mean(mses))
-        generated_less_inf_mses = [x for x in mses if np.isfinite(x) and x < inf]
-        if np.isfinite(np.mean(generated_less_inf_mses)) and np.isfinite(np.log(np.mean(generated_less_inf_mses))):
-            wandb_log['log_mean_generated_less_inf_mses'] = np.log(np.mean(generated_less_inf_mses))
-        the_percentile = percentile
-        # if len(mses) + len(best_mses) < 200:
-        #     the_percentile = 90
-        mse_threshold = np.nanpercentile(mses + best_mses, the_percentile)
-        epoch_best_formula_pairs = [x for x in enumerate(mses) if x[1] < mse_threshold]
-        epoch_best_formula_indices = set([x[0] for x in epoch_best_formula_pairs if x[1] < inf])
-        epoch_best_mses = [x[1] for x in epoch_best_formula_pairs if x[1] < inf]
-        print(f'epoch: {epoch}, mean best mses: {np.mean(epoch_best_mses)}')
-        if np.isfinite(np.mean(epoch_best_mses)) and np.isfinite(np.log(np.mean(epoch_best_mses))):
-            wandb_log['log_mean_epoch_mse_best'] = np.log(np.mean(epoch_best_mses))
-        epoch_best_formulas = []
-        with open(file_to_sample) as f:
-            for i, line in enumerate(f.readlines()):
-                if i in epoch_best_formula_indices:
-                    epoch_best_formulas.append(line.strip())
-        assert len(epoch_best_mses) == len(epoch_best_formulas)
-        last_best_sizes.append(len(epoch_best_formulas))
-        best_formulas += epoch_best_formulas
-        best_mses += epoch_best_mses
+        stats.save_best_samples(sampled_mses=mses, sampled_formulas=sampled_formulas, wandb_log=wandb_log, epoch=epoch)
 
-        sorted_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
-        sorted_best_mses = [x[0] for x in sorted_best_mses_and_formulas]
-        sorted_best_formulas = [x[1] for x in sorted_best_mses_and_formulas]
+        stats.write_last_n_to_file(retrain_file)
 
-        sorted_epoch_best_mses_and_formulas = sorted(zip(best_mses, best_formulas))
-        sorted_epoch_best_mses = [x[0] for x in sorted_epoch_best_mses_and_formulas]
-        sorted_epoch_best_formulas = [x[1] for x in sorted_epoch_best_mses_and_formulas]
-
-        the_very_best_formulas += sorted_epoch_best_formulas
-        the_very_best_mses += sorted_epoch_best_mses
-        the_very_best_mses_and_formulas = sorted(zip(the_very_best_mses, the_very_best_formulas))[:400]
-        the_very_best_mses = [x[0] for x in the_very_best_mses_and_formulas]
-        the_very_best_formulas = [x[1] for x in the_very_best_mses_and_formulas]
-
-        log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, f'last_{use_n_last_steps}_epochs')
-        log_mses_wandb(sorted_epoch_best_mses, sorted_epoch_best_formulas, wandb_log, epoch, f'current_epoch')
-        log_mses_wandb(the_very_best_mses, the_very_best_formulas, wandb_log, epoch, f'the_very_best')
-        with open(f'{file_to_sample}-train', 'w') as f:
-            f.write('\n'.join(best_formulas))
-
-        wandb.log(wandb_log)
-        if len(best_formulas) == 0:
-            print('training terminated')
-            break
-
-        train_batches, _ = my_batch_builder.build_ordered_batches(f'{file_to_sample}-train', batch_size, device)
+        monitoring.log(wandb_log)
+        train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device)
         my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch)
-    table = wandb.Table(columns=['formula'])
-    for f in reconstructed_formulas[:1000]:
-        table.add_data(f)
-    wandb.log({'final formula examples': table})
