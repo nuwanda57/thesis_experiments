@@ -70,7 +70,7 @@ class Statistics:
         sorted_epoch_best_pairs = sorted(zip(epoch_best_mses, epoch_best_formulas))
         sorted_epoch_best_formulas = [x[1] for x in sorted_epoch_best_pairs]
         sorted_epoch_best_mses = [x[0] for x in sorted_epoch_best_pairs]
-        log_mses_wandb(sorted_epoch_best_mses, sorted_epoch_best_formulas, wandb_log, epoch, 'the_best')
+        log_mses_wandb(sorted_epoch_best_mses, sorted_epoch_best_formulas, wandb_log, epoch, 'sampled')
 
     def _update_the_best_formulas(self, epoch_best_formulas, epoch_best_mses):
         self.the_best_formulas += epoch_best_formulas
