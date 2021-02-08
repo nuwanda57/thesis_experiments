@@ -54,10 +54,17 @@ def evaluate_file(filename, xs, ys):
     with open(filename) as f:
         for line in f:
             formulas.append(my_formula_utils.get_formula_representation(line.strip().split()))
-    results = []
+    mses = []
+    ress = []
+    coefss = []
+    optimized_formulas = []
     for formula in formulas:
-        results.append(evaluate(formula, xs, ys))
-    return results
+        mse, res, coefs, optimized_formula = evaluate(formula, xs, ys)
+        mses.append(mse)
+        ress.append(res)
+        coefss.append(coefs)
+        optimized_formulas.append(optimized_formula)
+    return mses, ress, coefss, optimized_formulas
 
 
 if __name__ == '__main__':

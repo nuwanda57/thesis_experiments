@@ -49,6 +49,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
     last_best_sizes = deque([0] * use_n_last_steps, maxlen=use_n_last_steps)
     the_very_best_mses = []
     the_very_best_formulas = []
+    inf = 10 ** 4
     for epoch in range(epochs):
         s = last_best_sizes.popleft()
         best_formulas = best_formulas[s:]
@@ -57,14 +58,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         reconstructed_formulas, _ = model.sample(
                 n_formulas_to_sample, max_length, file_to_sample)
         # print(reconstructed_formulas)
-        predicted_ys = my_evaluate_formula.evaluate_file(file_to_sample, xs, ys)
-        mses = []
-        inf = 10 ** 4
-        for i in range(len(predicted_ys)):
-            if predicted_ys[i] is None:
-                mses.append(inf)
-            else:
-                mses.append(mean_squared_error(predicted_ys[i], ys))
+        mses, ress, coeffs, optimized_formulas = my_evaluate_formula.evaluate_file(file_to_sample, xs, ys)
         print(f'epoch: {epoch}, mean mses: {np.mean(mses)}')
         if np.isfinite(np.mean(mses)) and np.isfinite(np.log(np.mean(mses))):
             wandb_log['log_mean_mse_generated'] = np.log(np.mean(mses))
