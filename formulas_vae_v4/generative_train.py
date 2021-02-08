@@ -81,11 +81,10 @@ class Statistics:
         self.the_best_formulas = []
         self.the_best_mses = []
         for i in range(len(the_best_pairs)):
-            f = ' '.join(the_best_pairs[i][1])
-            if f not in used_formulas:
+            if the_best_pairs[i][1] not in used_formulas:
                 self.the_best_formulas.append(the_best_pairs[i][1])
                 self.the_best_mses.append(the_best_pairs[i][0])
-            used_formulas.add(f)
+            used_formulas.add(the_best_pairs[i][1])
 
     def write_last_n_to_file(self, filename):
         with open(filename, 'w') as f:
@@ -104,6 +103,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         wandb_log = {}
         stats.clear_the_oldest_step()
         sampled_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
+        sampled_formulas = [' '.join(f) for f in sampled_formulas]
         mses, ress, coeffs, optimized_formulas = my_evaluate_formula.evaluate_file(file_to_sample, xs, ys)
         stats.save_best_samples(sampled_mses=mses, sampled_formulas=sampled_formulas, wandb_log=wandb_log, epoch=epoch)
 
