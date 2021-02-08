@@ -22,7 +22,7 @@ def generate_formula(all_tokens, service_tokens, max_len):
 
 def generate_pretrain_dataset(size, max_len, file=None):
     all_tokens = list(my_formula_config.TOKEN_TO_INDEX.keys())
-    service_tokens = {my_formula_config.NUMBER_SYMBOL, my_formula_config.END_OF_SEQUENCE,
+    service_tokens = {my_formula_config.END_OF_SEQUENCE,
                       my_formula_config.PADDING, my_formula_config.START_OF_SEQUENCE}
     formulas = []
     for _ in range(size):

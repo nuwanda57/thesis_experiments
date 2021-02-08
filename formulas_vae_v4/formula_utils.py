@@ -8,7 +8,7 @@ def maybe_get_valid(polish_formula):
     valid_polish_formula = []
     for token in polish_formula:
         if token in {my_formula_config.START_OF_SEQUENCE, my_formula_config.END_OF_SEQUENCE,
-                     my_formula_config.PADDING, my_formula_config.NUMBER_SYMBOL}:
+                     my_formula_config.PADDING}:
             continue
         if token in my_formula_config.OPERATORS:
             valid_polish_formula.append(token)
