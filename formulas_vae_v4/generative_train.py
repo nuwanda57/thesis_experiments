@@ -81,10 +81,11 @@ class Statistics:
         self.the_best_formulas = []
         self.the_best_mses = []
         for i in range(len(the_best_pairs)):
-            if the_best_pairs[i][1] not in used_formulas:
-                self.the_best_formulas.append(the_best_pairs[1])
-                self.the_best_mses.append(the_best_pairs[0])
-            used_formulas.add(the_best_pairs[1])
+            f = ' '.join(the_best_pairs[i][1])
+            if f not in used_formulas:
+                self.the_best_formulas.append(the_best_pairs[i][1])
+                self.the_best_mses.append(the_best_pairs[i][0])
+            used_formulas.add(f)
 
     def write_last_n_to_file(self, filename):
         with open(filename, 'w') as f:
