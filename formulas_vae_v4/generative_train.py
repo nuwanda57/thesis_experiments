@@ -18,9 +18,9 @@ def log_mses_wandb(sorted_best_mses, sorted_best_formulas, wandb_log, epoch, pre
     wandb_log[f'{prefix}_best_formulas_size'] = len(sorted_best_formulas)
     if np.isfinite(np.mean(sorted_best_mses)):
         if np.mean(sorted_best_mses) != 0:
-            wandb_log[f'{prefix}_log_mean_mse_best'] = np.log(np.mean(sorted_best_mses))
+            wandb_log[f'{prefix}_log_mean_mse_all'] = np.log(np.mean(sorted_best_mses))
         else:
-            wandb_log[f'{prefix}_log_mean_mse_best'] = -100
+            wandb_log[f'{prefix}_log_mean_mse_all'] = -100
         for count in [1, 10, 25, 50, 100, 200, 400]:
             if len(sorted_best_mses) < count:
                 continue
