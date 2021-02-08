@@ -76,9 +76,15 @@ class Statistics:
         self.the_best_formulas += epoch_best_formulas
         self.the_best_mses += epoch_best_mses
 
-        the_best_pairs = np.unique(sorted(zip(self.the_best_mses, self.the_best_formulas)), axis=0)[:100]
-        self.the_best_formulas = [x[1] for x in the_best_pairs]
-        self.the_best_mses = [x[0] for x in the_best_pairs]
+        the_best_pairs = sorted(zip(self.the_best_mses, self.the_best_formulas))[:200]
+        used_formulas = set()
+        self.the_best_formulas = []
+        self.the_best_mses = []
+        for i in range(len(the_best_pairs)):
+            if the_best_pairs[i][1] not in used_formulas:
+                self.the_best_formulas.append(the_best_pairs[1])
+                self.the_best_mses.append(the_best_pairs[0])
+            used_formulas.add(the_best_pairs[1])
 
     def write_last_n_to_file(self, filename):
         with open(filename, 'w') as f:
