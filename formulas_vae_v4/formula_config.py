@@ -10,7 +10,7 @@ PADDING = 'pad'
 NUMBER_SYMBOL = '<n>'
 VARIABLES = {'x'}
 NUMBERS = {
-    '1', '2', '3',
+    # '1', '2', '3',
 }
 
 
