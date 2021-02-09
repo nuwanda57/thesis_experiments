@@ -142,3 +142,9 @@ if __name__ == '__main__':
         mse,
         0, abs_tol=1e-5)
     print(f'{name}: real formula {formula}\n\tmse: {mse}\n\toptimized_formula: {optimized_formula}\n')
+
+    name = 'test 8'
+    formula = '((np.sin(3)) + (<n>)) * (np.cos((<n>) + (x)))'
+    ys = np.cos(xs + 0.5) + np.sin(xs) * 3
+    mse, res, coefs, optimized_formula = evaluate(formula, xs, ys)
+    print(f'{name}: real formula {formula}\n\tmse: {mse}\n\toptimized_formula: {optimized_formula}\n')

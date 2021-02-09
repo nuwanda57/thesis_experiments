@@ -179,7 +179,9 @@ class FormulaVARE(nn.Module):
         return formulas
 
     def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True):
-        zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
+        mu = np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f')
+        logsigma = np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f')
+        zs = self.sample_z(mu, logsigma)
         encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
 
