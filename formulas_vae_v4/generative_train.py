@@ -107,7 +107,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
 
         with torch.no_grad():
             for param in model.parameters():
-                param.add_(torch.randn(param.size()) * 0.01 * torch.norm(param))
+                param.add_(torch.randn(param.size()).to(device) * 0.01 * torch.norm(param).to(device))
 
         sampled_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
         sampled_formulas = [' '.join(f) for f in sampled_formulas]
