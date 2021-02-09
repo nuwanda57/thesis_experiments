@@ -135,8 +135,7 @@ class FormulaVARE(nn.Module):
     def maybe_write_formulas(self, reconstructed_formulas, zs, out_file=None):
         if out_file is not None:
             with open(out_file, 'w') as f:
-                for formula in reconstructed_formulas:
-                    f.write(' '.join(formula) + '\n')
+                f.write('\n'.join([' '.join(formula) for formula in reconstructed_formulas]))
             with open(f'{out_file}z', 'w') as f:
                 for zi in zs:
                     for zi_k in zi:
