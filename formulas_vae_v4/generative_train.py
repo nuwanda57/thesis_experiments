@@ -1,10 +1,12 @@
-import numpy as np
-from collections import deque
-
 import formulas_vae_v4.train as my_train
 import formulas_vae_v4.evaluate_formula as my_evaluate_formula
 import formulas_vae_v4.formula_utils as my_formula_utils
 import formulas_vae_v4.batch_builder as my_batch_builder
+
+import torch
+
+import numpy as np
+from collections import deque
 
 import wandb
 
@@ -102,6 +104,11 @@ def generative_train(model, optimizer, epochs, device, batch_size,
     for epoch in range(epochs):
         wandb_log = {}
         stats.clear_the_oldest_step()
+
+        with torch.no_grad():
+            for param in model.parameters():
+                param.add_(torch.randn(param.size()) * 0.01 * torch.norm(param))
+
         sampled_formulas, _ = model.sample(n_formulas_to_sample, max_length, file_to_sample)
         sampled_formulas = [' '.join(f) for f in sampled_formulas]
         mses, ress, coeffs, optimized_formulas = my_evaluate_formula.evaluate_file(file_to_sample, xs, ys)
