@@ -185,6 +185,8 @@ class FormulaVARE(nn.Module):
         encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
 
+        n_formulas_sampled = len(reconstructed_formulas)
+
         if ensure_valid:
             valid_formulas = []
             for f in reconstructed_formulas:
@@ -193,11 +195,15 @@ class FormulaVARE(nn.Module):
                     valid_formulas.append(maybe_valid)
             reconstructed_formulas = valid_formulas
 
+        n_valid_formulas_sampled = len(reconstructed_formulas)
+
         if unique:
             reconstructed_formulas = np.unique(reconstructed_formulas)
         self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
 
-        return reconstructed_formulas, zs
+        n_unique_valid_formulas_sampled = len(reconstructed_formulas)
+
+        return reconstructed_formulas, zs, n_formulas_sampled, n_valid_formulas_sampled, n_unique_valid_formulas_sampled
 
     def _reset_parameters(self):
         for p in self.parameters():
