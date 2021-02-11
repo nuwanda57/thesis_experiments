@@ -106,13 +106,23 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         wandb_log = {}
         stats.clear_the_oldest_step()
 
+        noises = []
         if add_noise_to_model_params:
             with torch.no_grad():
                 for param in model.parameters():
-                    param.add_(torch.randn(
-                        param.size()).to(device) * noise_to_model_params_weight * torch.norm(param).to(device))
+                    noise = torch.randn(
+                        param.size()).to(device) * noise_to_model_params_weight * torch.norm(param).to(device)
+                    param.add_(noise)
+                    noises.append(noise)
 
         sample_res = model.sample(n_formulas_to_sample, max_length, file_to_sample)
+
+        if add_noise_to_model_params:
+            with torch.no_grad():
+                for param in model.parameters():
+                    noise = noises.pop()
+                    param.add_(-noise)
+
         sampled_formulas, zs, n_formulas_sampled, n_valid_formulas_sampled, n_unique_valid_formulas_sampled = sample_res
         wandb_log['n_formulas_sampled'] = n_formulas_sampled
         wandb_log['n_valid_formulas_sampled'] = n_valid_formulas_sampled

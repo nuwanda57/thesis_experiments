@@ -208,3 +208,16 @@ class FormulaVARE(nn.Module):
         for p in self.parameters():
             if p.dim() > 1:
                 nn.init.xavier_uniform(p)
+
+
+if __name__ == '__main__':
+    device = torch.device('cpu')
+    model_params = {'token_embedding_dim': 128, 'hidden_dim': 128,
+                    'encoder_layers_cnt': 1, 'decoder_layers_cnt': 1, 'latent_dim': 8}
+    model_params = ModelParams(vocab_size=len(my_formula_config.INDEX_TO_TOKEN), device=device,
+                                        **model_params)
+    model = FormulaVARE(model_params)
+    with torch.no_grad():
+        for param in model.parameters():
+            print(param.size())
+            # param.add_(torch.randn(param.size()).to(device) * 0.01 * torch.norm(param).to(device))
