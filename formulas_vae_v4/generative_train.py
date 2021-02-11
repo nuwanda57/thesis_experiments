@@ -117,6 +117,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
 
         sample_res = model.sample(n_formulas_to_sample, max_length, file_to_sample)
 
+        noises = noises[::-1]
         if add_noise_to_model_params:
             with torch.no_grad():
                 for param in model.parameters():
