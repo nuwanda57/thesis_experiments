@@ -97,7 +97,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
                      ys, formula, use_n_last_steps, monitoring, add_noise_to_model_params=False,
-                     noise_to_model_params_weight=0.01):
+                     noise_to_model_params_weight=0.01, add_noise_every_n_steps=1):
     _pretrain(n_pretrain_steps, model, optimizer, pretrain_batches, pretrain_val_batches)
 
     retrain_file = f'{file_to_sample}-train'
@@ -107,7 +107,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         stats.clear_the_oldest_step()
 
         noises = []
-        if add_noise_to_model_params:
+        if add_noise_to_model_params and epoch % add_noise_every_n_steps == 1:
             with torch.no_grad():
                 for param in model.parameters():
                     noise = torch.randn(
@@ -118,7 +118,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         sample_res = model.sample(n_formulas_to_sample, max_length, file_to_sample)
 
         noises = noises[::-1]
-        if add_noise_to_model_params:
+        if add_noise_to_model_params and epoch % add_noise_every_n_steps == 1:
             with torch.no_grad():
                 for param in model.parameters():
                     noise = noises.pop()
