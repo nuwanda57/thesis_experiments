@@ -11,7 +11,7 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, max_len, epochs,
                          model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005,
                          betas=(0.5, 0.999), n_formulas_to_sample=200000, percentile=20, use_n_last_steps=6,
                          project_name='experiment_generative_train', add_noise_to_model_params=False,
-                         noise_to_model_params_weight=0.01):
+                         noise_to_model_params_weight=0.01, add_noise_every_n_steps=1):
 
     experiment_config = {
         'max_len': max_len, 'epochs': epochs, 'batch_size': batch_size, 'learning_rate': lr,
@@ -38,4 +38,5 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, max_len, epochs,
                                          pretrain_val_batches=valid_batches, xs=xs, ys=ys, formula=formula,
                                          use_n_last_steps=use_n_last_steps, monitoring=monitoring,
                                          add_noise_to_model_params=add_noise_to_model_params,
-                                         noise_to_model_params_weight=noise_to_model_params_weight)
+                                         noise_to_model_params_weight=noise_to_model_params_weight,
+                                         add_noise_every_n_steps=add_noise_every_n_steps)
