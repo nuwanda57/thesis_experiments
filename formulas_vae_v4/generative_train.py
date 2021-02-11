@@ -97,7 +97,8 @@ def generative_train(model, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
                      ys, formula, use_n_last_steps, monitoring, add_noise_to_model_params=False,
-                     noise_to_model_params_weight=0.01, add_noise_every_n_steps=1):
+                     noise_to_model_params_weight=0.01, add_noise_every_n_steps=1, no_retrain=False,
+                     continue_training_on_train_dataset=False):
     _pretrain(n_pretrain_steps, model, optimizer, pretrain_batches, pretrain_val_batches)
 
     retrain_file = f'{file_to_sample}-train'
@@ -137,4 +138,7 @@ def generative_train(model, optimizer, epochs, device, batch_size,
 
         monitoring.log(wandb_log)
         train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device)
-        my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch)
+        if not no_retrain:
+            my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch)
+        if continue_training_on_train_dataset:
+            _pretrain(1, model, optimizer, pretrain_batches, pretrain_val_batches)
