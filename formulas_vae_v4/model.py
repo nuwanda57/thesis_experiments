@@ -186,7 +186,7 @@ class FormulaVARE(nn.Module):
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
 
         with open('debug-rec', 'w') as f:
-            f.write('\n'.join(' '.join([t for t in reconstructed_formulas])))
+            f.write('\n'.join(' '.join(t) for t in reconstructed_formulas))
         print(reconstructed_formulas, flush=True)
 
         n_formulas_sampled = len(reconstructed_formulas)
