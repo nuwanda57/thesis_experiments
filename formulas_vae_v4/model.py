@@ -178,12 +178,14 @@ class FormulaVARE(nn.Module):
         return formulas
 
     def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True):
-        # mu = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
-        # logsigma = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
-        # zs = self.sample_z(mu, logsigma).detach().numpy()
-        zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
+        mu = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
+        logsigma = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
+        zs = self.sample_z(mu, logsigma).detach().numpy()
+        # zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
         encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+        print(reconstructed_formulas, flush=True)
+        raise 42
 
         n_formulas_sampled = len(reconstructed_formulas)
 
