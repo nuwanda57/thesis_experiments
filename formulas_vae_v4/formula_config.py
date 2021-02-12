@@ -35,6 +35,9 @@ OPERATORS = {
     'mult': Operator(2, 'mult',
                      lambda params: params[0] * params[1],
                      lambda params: f"({params[0]}) * ({params[1]})"),
+    # 'pow': Operator(2, 'pow',
+    #                  lambda params: params[0] ** params[1],
+    #                  lambda params: f"({params[0]}) ** ({params[1]})"),
 }
 
 INDEX_TO_TOKEN = [
