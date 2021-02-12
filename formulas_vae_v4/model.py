@@ -184,8 +184,10 @@ class FormulaVARE(nn.Module):
         # zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
         encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
+
+        with open('debug-rec', 'w') as f:
+            f.write('\n'.join(' '.join([t for t in reconstructed_formulas])))
         print(reconstructed_formulas, flush=True)
-        raise 42
 
         n_formulas_sampled = len(reconstructed_formulas)
 
