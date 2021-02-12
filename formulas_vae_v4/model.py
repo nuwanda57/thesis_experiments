@@ -201,9 +201,15 @@ class FormulaVARE(nn.Module):
 
         n_valid_formulas_sampled = len(reconstructed_formulas)
 
+        with open('debug-rec-2', 'w') as f:
+            f.write('\n'.join(' '.join(t) for t in reconstructed_formulas))
+
         if unique:
             reconstructed_formulas = np.unique(reconstructed_formulas)
         self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
+
+        with open('debug-rec-3', 'w') as f:
+            f.write('\n'.join(' '.join(t) for t in reconstructed_formulas))
 
         n_unique_valid_formulas_sampled = len(reconstructed_formulas)
 
