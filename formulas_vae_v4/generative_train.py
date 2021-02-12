@@ -117,7 +117,6 @@ def generative_train(model, optimizer, epochs, device, batch_size,
                     noises.append(noise)
 
         sample_res = model.sample(n_formulas_to_sample, max_length, file_to_sample)
-        raise 42
 
         noises = noises[::-1]
         if add_noise_to_model_params and epoch % add_noise_every_n_steps == 1:
