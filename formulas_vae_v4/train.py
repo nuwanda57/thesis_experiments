@@ -29,7 +29,7 @@ def evaluate(model, batches):
     return loss, np.mean(rec_losses), np.mean(kl_losses)
 
 
-def run_epoch(model, optimizer, train_batches, valid_batches, epoch):
+def run_epoch(model, optimizer, train_batches, valid_batches, epoch, kl_coef=0.01):
     print('Epoch %d' % epoch)
     kl_losses, rec_losses, losses = [], [], []
     model.train()
@@ -40,7 +40,7 @@ def run_epoch(model, optimizer, train_batches, valid_batches, epoch):
         inputs, targets = train_batches[idx]
         logits, mu, logsigma, z = model(inputs)
         rec, kl = loss_function(logits, targets, mu, logsigma)
-        loss = rec
+        loss = rec + kl_coef * kl
         loss.backward()
         optimizer.step()
         rec_losses.append(rec.item())
