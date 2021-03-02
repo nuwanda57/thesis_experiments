@@ -12,7 +12,7 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, max_len, epochs,
                          betas=(0.5, 0.999), n_formulas_to_sample=200000, percentile=20, use_n_last_steps=6,
                          project_name='experiment_generative_train', add_noise_to_model_params=False,
                          noise_to_model_params_weight=0.01, add_noise_every_n_steps=1, no_retrain=False,
-                         continue_training_on_train_dataset=False, kl_coef=0.1):
+                         continue_training_on_train_dataset=False, kl_coef=0.2):
 
     experiment_config = {
         'max_len': max_len, 'epochs': epochs, 'batch_size': batch_size, 'learning_rate': lr,

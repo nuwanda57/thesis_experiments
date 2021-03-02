@@ -52,6 +52,7 @@ INDEX_TO_TOKEN = [
 TOKEN_TO_INDEX = {
     t: i for i, t in enumerate(INDEX_TO_TOKEN)
 }
+SERVICE_TOKENS = [START_OF_SEQUENCE, END_OF_SEQUENCE, PADDING]
 
 
 if __name__ == '__main__':
