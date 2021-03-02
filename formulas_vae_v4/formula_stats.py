@@ -34,8 +34,7 @@ def get_all_formulas(nodes_cnt, tokens):
             vars_tokens.append([tok])
     postfix_for_count_and_vars_pair = dict()
     formulas = get_all_postfix(nodes_cnt, tokens, postfix_for_count_and_vars_pair, vars_tokens, 1)
-    print(len(formulas))
-    print(formulas[:50])
+    return formulas
 
 
 if __name__ == '__main__':
