@@ -2,8 +2,8 @@ import wandb
 
 
 class Monitoring:
-    def __init__(self, project_name, correct_formula, x_range, experiment_config):
-        wandb.init(project=project_name)
+    def __init__(self, project_name, job_name, correct_formula, x_range, experiment_config):
+        wandb.init(project=project_name, job_name=job_name)
         table = wandb.Table(columns=['correct formula', 'x_range'])
         table.add_data(correct_formula, x_range)
         wandb.log({'formula settings': table})
