@@ -23,7 +23,7 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, max_len, epochs,
         'noise_to_model_params_weight': noise_to_model_params_weight,
         'add_noise_every_n_steps': add_noise_every_n_steps,
     }
-    monitoring = my_monitoring.Monitoring(project_name=project_name, job_name=job_name, correct_formula=formula,
+    monitoring = my_monitoring.Monitoring(project_name=project_name, name=job_name, correct_formula=formula,
                                           x_range=f'x_min={min(xs)}, x_max={max(xs)}, x_count={len(xs)}',
                                           experiment_config=experiment_config)
 
