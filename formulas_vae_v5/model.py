@@ -107,7 +107,16 @@ class FormulaVARE(nn.Module):
         mu, logsigma = self.encode(tokens, X, y)
         z = self.sample_z(mu, logsigma)
         # z: (batch_size, latent_dim)
-        logits, _ = self.decode(tokens, z)
+        # X: (batch_size, n_points, x_dim)
+        # y: (batch_size, n_points, 1)
+        condition = torch.from_numpy(np.concatenate((X, y), axis=-1).astype(np.float32)).to(self.device)
+        # condition: (batch_size, n_points, x_dim + 1)
+        hidden = self.condition_decoder(condition).mean(dim=1)
+        hidden = torch.repeat_interleave(hidden.unsqueeze(0), 2 * self.encoder_layers_cnt, dim=0)
+        c = torch.zeros_like(hidden).to(self.device)
+        hidden = (hidden, c)
+
+        logits, _ = self.decode(tokens, z, hidden)
         # logits: (formula_len, batch_size, vocab_size)
         return logits, mu, logsigma, z
 
