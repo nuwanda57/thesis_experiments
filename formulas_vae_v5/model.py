@@ -5,13 +5,13 @@ import numpy as np
 
 from collections import namedtuple
 
-import formulas_vae_v4.formula_utils as my_formula_utils
-import formulas_vae_v4.formula_config as my_formula_config
+import formulas_vae_v5.formula_utils as my_formula_utils
+import formulas_vae_v5.formula_config as my_formula_config
 
 
 ModelParams = namedtuple('ModelParams', [
     'vocab_size', 'token_embedding_dim', 'hidden_dim', 'encoder_layers_cnt', 'decoder_layers_cnt',
-    'latent_dim', 'device'])
+    'latent_dim', 'device', 'x_dim'])
 ModelParams.__new__.__defaults__ = (None,) * len(ModelParams._fields)
 
 

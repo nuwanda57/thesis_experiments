@@ -23,8 +23,8 @@ def build_ordered_batches(formula_file, batch_size, device):
     with open(formula_file) as f:
         for line in f:
             formulas.append(line.split())
-            Xs.append(np.linspace(0.1, 1, 50))
-            ys.append(np.ones(1))
+            Xs.append(np.linspace(0.1, 1, 50).reshape(50, 1))
+            ys.append(np.ones(50).reshape(50, 1))
 
     batches = []
     order = range(len(formulas))  # This will be necessary for reconstruction

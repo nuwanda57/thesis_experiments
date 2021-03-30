@@ -20,7 +20,7 @@ def evaluate(model, batches):
     model.eval()
     kl_losses, rec_losses = [], []
     with torch.no_grad():
-        for inputs, targets, Xs, ys in batches:
+        for (inputs, targets), Xs, ys in batches:
             logits, mu, logsigma, z = model(inputs, Xs, ys)
             rec, kl = loss_function(logits, targets, mu, logsigma)
             kl_losses.append(kl.item())
@@ -37,7 +37,7 @@ def run_epoch(model, optimizer, train_batches, valid_batches, epoch, kl_coef=0.0
     random.shuffle(indices)
     for i, idx in enumerate(indices):
         optimizer.zero_grad()
-        inputs, targets, Xs, ys = train_batches[idx]
+        (inputs, targets), Xs, ys = train_batches[idx]
         logits, mu, logsigma, z = model(inputs, Xs, ys)
         rec, kl = loss_function(logits, targets, mu, logsigma)
         loss = rec + kl_coef * kl
