@@ -103,13 +103,13 @@ class FormulaVARE(nn.Module):
         # logits: (formula_len, batch_size, vocab_size)
         return logits, hidden
 
-    def forward(self, tokens, X, y):
-        mu, logsigma = self.encode(tokens, X, y)
+    def forward(self, tokens, Xs, ys):
+        mu, logsigma = self.encode(tokens, Xs, ys)
         z = self.sample_z(mu, logsigma)
         # z: (batch_size, latent_dim)
-        # X: (batch_size, n_points, x_dim)
-        # y: (batch_size, n_points, 1)
-        condition = torch.from_numpy(np.concatenate((X, y), axis=-1).astype(np.float32)).to(self.device)
+        # Xs: (batch_size, n_points, x_dim)
+        # ys: (batch_size, n_points, 1)
+        condition = torch.from_numpy(np.concatenate((Xs, ys), axis=-1).astype(np.float32)).to(self.device)
         # condition: (batch_size, n_points, x_dim + 1)
         hidden = self.condition_decoder(condition).mean(dim=1)
         hidden = torch.repeat_interleave(hidden.unsqueeze(0), 1 * self.encoder_layers_cnt, dim=0)
@@ -166,47 +166,54 @@ class FormulaVARE(nn.Module):
                         f.write('%f ' % zi_k)
                     f.write('\n')
 
-    def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample'):
+    def reconstruct(self, batches, order, max_len, out_file=None, strategy='sample', Xs=None, ys=None):
         z = self.build_ordered_latents(batches, order, strategy=strategy)
         zs = [zi for batch_z in z for zi in batch_z]
         # z: (batches, z_in_batch, latent_dim)
-        encoded_formulas = self.reconstruct_encoded_formulas_from_latent_batched(z, max_len)
+        encoded_formulas = self.reconstruct_encoded_formulas_from_latent_batched(z, max_len, Xs=None, ys=None)
         # encoded_formulas: (total_formula_count, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
         self.maybe_write_formulas(reconstructed_formulas, zs, out_file)
 
         return reconstructed_formulas, zs
 
-    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len, explore=False, eps=0.2):
+    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len, explore=False, eps=0.2, Xs=None, ys=None):
         formulas = []
         # z: (z_in_batch, latent_dim)
-        x = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(
+        tokens = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(
             my_formula_config.TOKEN_TO_INDEX[my_formula_config.START_OF_SEQUENCE])
-        # x: (1, z_in_batch)
+        # tokens: (1, z_in_batch)
         hidden = None
+        if Xs is not None:
+            condition = torch.from_numpy(np.concatenate((Xs, ys), axis=-1).astype(np.float32)).to(self.device)
+            # condition: (batch_size, n_points, x_dim + 1)
+            hidden = self.condition_decoder(condition).mean(dim=1)
+            hidden = torch.repeat_interleave(hidden.unsqueeze(0), 1 * self.encoder_layers_cnt, dim=0)
+            c = torch.zeros_like(hidden).to(self.device)
+            hidden = (hidden, c)
         for i in range(max_len):
-            formulas.append(x)
+            formulas.append(tokens)
             logits, hidden = self.decode(x, torch.tensor(zs, device=self.device), hidden)
-            x = logits.argmax(dim=-1)
+            tokens = logits.argmax(dim=-1)
         # formulas_in_batch [[[f1_0, f2_0, ..]], [[f1_1, f2_1, ..]], ..] -> [[f1_0, f1_1, ..], [f2_0, f2_1, ..], ..]
         formulas = torch.cat(formulas, 0).T
         return formulas
 
-    def reconstruct_encoded_formulas_from_latent_batched(self, z_batched, max_len):
+    def reconstruct_encoded_formulas_from_latent_batched(self, z_batched, max_len, Xs=None, ys=None):
         # z_batched: (batches, z_in_batch, latent_dim)
         formulas = []
         for z in z_batched:
-            formulas_in_batch = self._reconstruct_encoded_formulas_from_latent(z, max_len)
+            formulas_in_batch = self._reconstruct_encoded_formulas_from_latent(z, max_len, Xs=Xs, ys=ys)
             for f in formulas_in_batch:
                 formulas.append(f)
         return formulas
 
-    def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True):
+    def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True, Xs=None, ys=None):
         # mu = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
         # logsigma = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
         # zs = self.sample_z(, logsigma).detach().numpy()
         zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
-        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len)
+        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len, Xs=Xs, ys=ys)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
 
         n_formulas_sampled = len(reconstructed_formulas)
