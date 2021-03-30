@@ -193,7 +193,7 @@ class FormulaVARE(nn.Module):
             hidden = (hidden, c)
         for i in range(max_len):
             formulas.append(tokens)
-            logits, hidden = self.decode(x, torch.tensor(zs, device=self.device), hidden)
+            logits, hidden = self.decode(tokens, torch.tensor(zs, device=self.device), hidden)
             tokens = logits.argmax(dim=-1)
         # formulas_in_batch [[[f1_0, f2_0, ..]], [[f1_1, f2_1, ..]], ..] -> [[f1_0, f1_1, ..], [f2_0, f2_1, ..], ..]
         formulas = torch.cat(formulas, 0).T
