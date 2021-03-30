@@ -170,7 +170,7 @@ class FormulaVARE(nn.Module):
         z = self.build_ordered_latents(batches, order, strategy=strategy)
         zs = [zi for batch_z in z for zi in batch_z]
         # z: (batches, z_in_batch, latent_dim)
-        encoded_formulas = self.reconstruct_encoded_formulas_from_latent_batched(z, max_len, Xs=None, ys=None)
+        encoded_formulas = self.reconstruct_encoded_formulas_from_latent_batched(z, max_len, Xs=Xs, ys=ys)
         # encoded_formulas: (total_formula_count, max_len)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
         self.maybe_write_formulas(reconstructed_formulas, zs, out_file)

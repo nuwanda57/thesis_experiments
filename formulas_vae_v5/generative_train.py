@@ -144,7 +144,8 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         stats.write_last_n_to_file(retrain_file)
 
         monitoring.log(wandb_log)
-        train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device)
+        train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device, real_X=xs,
+                                                                  real_y=xs)
         if not no_retrain:
             my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch, kl_coef)
         if continue_training_on_train_dataset:
