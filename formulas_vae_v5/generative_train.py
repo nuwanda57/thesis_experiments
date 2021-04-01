@@ -2,6 +2,7 @@ import formulas_vae_v5.train as my_train
 import formulas_vae_v5.evaluate_formula as my_evaluate_formula
 import formulas_vae_v5.formula_utils as my_formula_utils
 import formulas_vae_v5.batch_builder as my_batch_builder
+import formulas_vae_v5.active_learning as my_active_learning
 
 import torch
 
@@ -150,3 +151,5 @@ def generative_train(model, optimizer, epochs, device, batch_size,
             my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch, kl_coef)
         if continue_training_on_train_dataset:
             _pretrain(1, model, optimizer, pretrain_batches, pretrain_val_batches, kl_coef)
+
+        new_x = my_active_learning.pick_next_point(np.linspace(0.01, 1, 10), xs, ys, model, n_formulas_to_sample, max_length)
