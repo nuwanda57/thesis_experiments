@@ -105,8 +105,6 @@ def generative_train(eval_xs, eval_ys, model, optimizer, epochs, device, batch_s
     retrain_file = f'{file_to_sample}-train'
     stats = Statistics(use_n_last_steps=use_n_last_steps, percentile=percentile)
 
-    new_x_candidates = set(np.linspace(0.01, 1, 100))
-
     for epoch in range(epochs):
         wandb_log = {}
         stats.clear_the_oldest_step()
@@ -155,10 +153,10 @@ def generative_train(eval_xs, eval_ys, model, optimizer, epochs, device, batch_s
             _pretrain(1, model, optimizer, pretrain_batches, pretrain_val_batches, kl_coef)
 
         if epoch % 10 == 0:
+            new_x_candidates = np.random.uniform(0.01, 1, 10)
             new_x, max_entropy = my_active_learning.pick_next_point(new_x_candidates, xs, ys, model,
                                                                   n_formulas_to_sample, max_length)
             wandb_log['max_var'] = max_entropy
-            new_x_candidates.remove(new_x)
 
             xs = np.append(xs, new_x)
             f_to_eval = formula
