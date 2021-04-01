@@ -177,7 +177,8 @@ class FormulaVARE(nn.Module):
 
         return reconstructed_formulas, zs
 
-    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len, explore=False, eps=0.2, Xs=None, ys=None):
+    def _reconstruct_encoded_formulas_from_latent(self, zs, max_len, explore=False, eps=0.2, Xs=None, ys=None,
+                                                  sample=False):
         formulas = []
         # z: (z_in_batch, latent_dim)
         tokens = torch.zeros(1, len(zs), dtype=torch.long, device=self.device).fill_(
@@ -194,7 +195,11 @@ class FormulaVARE(nn.Module):
         for i in range(max_len):
             formulas.append(tokens)
             logits, hidden = self.decode(tokens, torch.tensor(zs, device=self.device), hidden)
-            tokens = logits.argmax(dim=-1)
+            # logits: (formula_len, batch_size, vocab_size)
+            if not sample:
+                tokens = logits.argmax(dim=-1)
+            else:
+                tokens = torch.multinomial(torch.softmax(logits, dim=-1).squeeze(), 1).reshape(1, -1)
         # formulas_in_batch [[[f1_0, f2_0, ..]], [[f1_1, f2_1, ..]], ..] -> [[f1_0, f1_1, ..], [f2_0, f2_1, ..], ..]
         formulas = torch.cat(formulas, 0).T
         return formulas
@@ -208,12 +213,15 @@ class FormulaVARE(nn.Module):
                 formulas.append(f)
         return formulas
 
-    def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True, Xs=None, ys=None):
+    def sample(self, n_formulas, max_len, out_file=None, ensure_valid=True, unique=True, Xs=None, ys=None,
+               sample_from_logits=False, zs=None):
         # mu = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
         # logsigma = torch.tensor(np.random.uniform(-1, 1, size=(n_formulas, self.latent_dim)).astype('f'))
         # zs = self.sample_z(, logsigma).detach().numpy()
-        zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
-        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len, Xs=Xs, ys=ys)
+        if zs is None:
+            zs = np.random.normal(size=(n_formulas, self.latent_dim)).astype('f')
+        encoded_formulas = self._reconstruct_encoded_formulas_from_latent(zs, max_len, Xs=Xs, ys=ys,
+                                                                          sample=sample_from_logits)
         reconstructed_formulas = self.reconstructed_formulas_from_encoded_formulas(encoded_formulas)
 
         n_formulas_sampled = len(reconstructed_formulas)

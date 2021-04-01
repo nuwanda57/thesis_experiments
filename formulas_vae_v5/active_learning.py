@@ -39,7 +39,7 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
         cond_x = np.repeat(cond_x.reshape(1, -1, 1), n_sample, axis=0)
         cond_y = np.repeat(cond_y.reshape(1, -1, 1), n_sample, axis=0)
         with torch.no_grad():
-            sample_res = model.sample(n_sample, max_length, file_to_sample, Xs=cond_x, ys=cond_y)
+            sample_res = model.sample(n_sample, max_length, file_to_sample, Xs=cond_x, ys=cond_y, unique=False)
         sampled_formulas, _, _, _, _ = sample_res
         _, ress, _, _ = my_evaluate_formula.evaluate_file(file_to_sample, np.append(X_train, x), np.append(y_train, 0))
 
@@ -52,17 +52,31 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
             # max_entropy = entropy
 
         ress = torch.tensor(ress)
-        print('ress', ress.shape)
-        print(ress)
 
         var = torch.var(ress, dim=0)
         var = torch.mean(var)
 
-        print(var)
+        print('var1', var)
 
         if max_entropy is None or max_entropy < var:
             next_point = x
             max_entropy = var
+
+        ###### Zero sample logits
+        zs = np.zeros(shape=(n_sample, model.latent_dim)).astype('f')
+        with torch.no_grad():
+            sample_res = model.sample(n_sample, max_length, file_to_sample, Xs=cond_x, ys=cond_y, unique=False,
+                                      sample_from_logits=True, zs=zs)
+
+        _, ress, _, _ = my_evaluate_formula.evaluate_file(file_to_sample, np.append(X_train, x), np.append(y_train, 0))
+
+        ress = torch.tensor(ress)
+
+        var = torch.var(ress, dim=0)
+        var = torch.mean(var)
+
+        print('var 2', var)
+
 
     print('next point', next_point)
 
