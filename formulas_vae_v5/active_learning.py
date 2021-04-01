@@ -56,7 +56,7 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
         var = torch.var(ress, dim=0)
         var = torch.mean(var)
 
-        print('var1', var)
+        # print('var1', var)
 
         if max_entropy is None or max_entropy < var:
             next_point = x
@@ -75,12 +75,12 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
         var = torch.var(ress, dim=0)
         var = torch.mean(var)
 
-        print('var 2', var)
+        # print('var 2', var)
 
 
     print('next point', next_point)
 
-    return next_point
+    return next_point, max_entropy
 
 
 # if __name__ == '__main__':

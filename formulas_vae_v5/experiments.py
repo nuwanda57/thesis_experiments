@@ -7,7 +7,7 @@ import formulas_vae_v5.generative_train as my_generative_train
 import formulas_vae_v5.monitoring as my_monitoring
 
 
-def exp_generative_train(xs, ys, formula, train_file, val_file, max_len, epochs,
+def exp_generative_train(eval_xs, eval_ys, xs, ys, formula, train_file, val_file, max_len, epochs,
                          model_conf_params, n_pretrain_steps=50, batch_size=256, lr=0.0005,
                          betas=(0.5, 0.999), n_formulas_to_sample=200000, percentile=20, use_n_last_steps=6,
                          project_name='experiment_generative_train', add_noise_to_model_params=False,
@@ -36,7 +36,9 @@ def exp_generative_train(xs, ys, formula, train_file, val_file, max_len, epochs,
     model = my_model.FormulaVARE(model_params)
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, betas=betas)
-    my_generative_train.generative_train(model=model, optimizer=optimizer, epochs=epochs, device=device,
+    my_generative_train.generative_train(eval_xs=eval_xs, eval_ys=eval_ys, model=model, optimizer=optimizer,
+                                         epochs=epochs,
+                                         device=device,
                                          batch_size=batch_size, n_formulas_to_sample=n_formulas_to_sample,
                                          file_to_sample='sample', max_length=max_len, percentile=percentile,
                                          n_pretrain_steps=n_pretrain_steps, pretrain_batches=train_batches,

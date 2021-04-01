@@ -94,7 +94,7 @@ class Statistics:
             f.write('\n'.join(self.last_n_best_formulas))
 
 
-def generative_train(model, optimizer, epochs, device, batch_size,
+def generative_train(eval_xs, eval_ys, model, optimizer, epochs, device, batch_size,
                      n_formulas_to_sample, file_to_sample, max_length, percentile,
                      n_pretrain_steps, pretrain_batches, pretrain_val_batches, xs,
                      ys, formula, use_n_last_steps, monitoring, add_noise_to_model_params=False,
@@ -104,6 +104,9 @@ def generative_train(model, optimizer, epochs, device, batch_size,
 
     retrain_file = f'{file_to_sample}-train'
     stats = Statistics(use_n_last_steps=use_n_last_steps, percentile=percentile)
+
+    new_x_candidates = set(np.linspace(0.01, 1, 100))
+
     for epoch in range(epochs):
         wandb_log = {}
         stats.clear_the_oldest_step()
@@ -144,7 +147,6 @@ def generative_train(model, optimizer, epochs, device, batch_size,
 
         stats.write_last_n_to_file(retrain_file)
 
-        monitoring.log(wandb_log)
         train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device, real_X=xs,
                                                                   real_y=xs)
         if not no_retrain:
@@ -152,9 +154,15 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         if continue_training_on_train_dataset:
             _pretrain(1, model, optimizer, pretrain_batches, pretrain_val_batches, kl_coef)
 
-        new_x = my_active_learning.pick_next_point(np.linspace(0.01, 1, 10), xs, ys, model, n_formulas_to_sample, max_length)
+        if epoch % 10 == 0:
+            new_x, max_entropy = my_active_learning.pick_next_point(new_x_candidates, xs, ys, model,
+                                                                  n_formulas_to_sample, max_length)
+            wandb_log['max_var'] = max_entropy
+            new_x_candidates.remove(new_x)
 
-        xs = np.append(xs, new_x)
-        f_to_eval = formula
-        _, res, _, _ = my_evaluate_formula.evaluate(f_to_eval, xs, np.append(ys, 0))
-        ys = np.append(ys, res[-1])
+            xs = np.append(xs, new_x)
+            f_to_eval = formula
+            _, res, _, _ = my_evaluate_formula.evaluate(f_to_eval, xs, np.append(ys, 0))
+            ys = np.append(ys, res[-1])
+
+        monitoring.log(wandb_log)
