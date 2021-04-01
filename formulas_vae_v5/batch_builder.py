@@ -1,4 +1,6 @@
 import formulas_vae_v5.formula_config as my_formula_config
+import formulas_vae_v5.evaluate_formula as my_evaluate_formula
+import formulas_vae_v5.formula_utils as my_formula_utils
 
 import torch
 import numpy as np
@@ -16,15 +18,17 @@ def build_single_batch_from_formulas_list(formulas_list, device):
     return torch.LongTensor(batch_in).T.contiguous().to(device), torch.LongTensor(batch_out).T.contiguous().to(device)
 
 
-def build_ordered_batches(formula_file, batch_size, device):
+def build_ordered_batches(formula_file, batch_size, device, real_X, real_y):
     formulas = []
     Xs = []
     ys = []
     with open(formula_file) as f:
         for line in f:
             formulas.append(line.split())
-            Xs.append(np.linspace(0.1, 1, 50).reshape(50, 1))
-            ys.append(np.ones(50).reshape(50, 1))
+            f_to_eval = my_formula_utils.get_formula_representation(line.strip().split())
+            Xs.append(real_X.reshape(-1, 1))
+            _, res, _, _ = my_evaluate_formula.evaluate(f_to_eval, real_X, real_y)
+            ys.append(np.array(res).reshape(-1, 1))
 
     batches = []
     order = range(len(formulas))  # This will be necessary for reconstruction

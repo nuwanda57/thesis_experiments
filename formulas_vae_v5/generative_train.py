@@ -116,7 +116,14 @@ def generative_train(model, optimizer, epochs, device, batch_size,
                     param.add_(noise)
                     noises.append(noise)
 
-        sample_res = model.sample(n_formulas_to_sample, max_length, file_to_sample)
+        cond_x = np.copy(xs)
+        cond_y = np.copy(ys)
+        if len(xs.shape) == 1:
+            cond_x = cond_x.reshape(-1, 1)
+        cond_y = cond_y.reshape(-1, 1)
+        cond_x = np.repeat(cond_x.reshape(1, -1, 1), n_formulas_to_sample, axis=0)
+        cond_y = np.repeat(cond_y.reshape(1, -1, 1), n_formulas_to_sample, axis=0)
+        sample_res = model.sample(n_formulas_to_sample, max_length, file_to_sample, Xs=cond_x, ys=cond_y)
 
         noises = noises[::-1]
         if add_noise_to_model_params and epoch % add_noise_every_n_steps == 1:
@@ -137,7 +144,8 @@ def generative_train(model, optimizer, epochs, device, batch_size,
         stats.write_last_n_to_file(retrain_file)
 
         monitoring.log(wandb_log)
-        train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device)
+        train_batches, _ = my_batch_builder.build_ordered_batches(retrain_file, batch_size, device, real_X=xs,
+                                                                  real_y=xs)
         if not no_retrain:
             my_train.run_epoch(model, optimizer, train_batches, train_batches, epoch, kl_coef)
         if continue_training_on_train_dataset:
