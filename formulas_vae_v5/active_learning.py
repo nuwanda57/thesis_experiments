@@ -43,13 +43,26 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
         sampled_formulas, _, _, _, _ = sample_res
         _, ress, _, _ = my_evaluate_formula.evaluate_file(file_to_sample, np.append(X_train, x), np.append(y_train, 0))
 
-        print('ress', ress)
-        entropy = empirical_entropy(torch.tensor(ress)).mean()
-        print('entropy', entropy)
+        # print('ress', ress)
+        # entropy = empirical_entropy(torch.tensor(ress)).mean()
+        # print('entropy', entropy)
 
-        if max_entropy is None or max_entropy < entropy:
+        # if max_entropy is None or max_entropy < entropy:
+        #     next_point = x
+            # max_entropy = entropy
+
+        ress = torch.tensor(ress)
+        print('ress', ress.shape)
+        print(ress)
+
+        var = torch.var(ress, dim=0)
+        var = torch.mean(var)
+
+        print(var)
+
+        if max_entropy is None or max_entropy < var:
             next_point = x
-            max_entropy = entropy
+            max_entropy = var
 
     print('next point', next_point)
 
