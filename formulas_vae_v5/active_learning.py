@@ -31,7 +31,6 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
     next_point = None
     for x in candidate_X:
         # TODO(julia): decide what to do with y(x) - unknown
-        X = np.append(X_train, x).reshape(-1, 1)
         cond_x = np.append(X_train, x)
         cond_y = np.append(y_train, 0)
         if len(cond_x.shape) == 1:
@@ -43,7 +42,7 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
         sampled_formulas, _, _, _, _ = sample_res
         _, ress, _, _ = my_evaluate_formula.evaluate_file(file_to_sample, np.append(X_train, x), np.append(y_train, 0))
 
-        entropy = empirical_entropy(ress).mean()
+        entropy = empirical_entropy(torch.from_numpy(np.array(ress))).mean()
 
         if max_entropy is None or max_entropy < entropy:
             next_point = x

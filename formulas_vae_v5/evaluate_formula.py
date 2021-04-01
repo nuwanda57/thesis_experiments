@@ -71,6 +71,9 @@ if __name__ == '__main__':
     from math import isclose
     xs = np.linspace(0.0, 2.0, num=100)
 
+    formula = '4 * np.cos(10 * np.sin(3 * x)) + x'
+    print(evaluate(formula, np.linspace(0.0, 2.0, num=5), [0] * 5)[1])
+
     name = 'test 1'
     formula = 'x * np.sin(<n>)'
     ys = xs * np.sin(5)
