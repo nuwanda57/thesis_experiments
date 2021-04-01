@@ -153,3 +153,8 @@ def generative_train(model, optimizer, epochs, device, batch_size,
             _pretrain(1, model, optimizer, pretrain_batches, pretrain_val_batches, kl_coef)
 
         new_x = my_active_learning.pick_next_point(np.linspace(0.01, 1, 10), xs, ys, model, n_formulas_to_sample, max_length)
+
+        xs = np.append(xs, new_x)
+        f_to_eval = my_formula_utils.get_formula_representation(formula.strip().split())
+        _, res, _, _ = my_evaluate_formula.evaluate(f_to_eval, xs, np.append(ys, 0))
+        ys = np.append(ys, res[-1])
