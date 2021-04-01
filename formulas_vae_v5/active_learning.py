@@ -38,7 +38,7 @@ def pick_next_point(candidate_X, X_train, y_train, model, n_sample, max_length):
         cond_y = cond_y.reshape(-1, 1)
         cond_x = np.repeat(cond_x.reshape(1, -1, 1), n_sample, axis=0)
         cond_y = np.repeat(cond_y.reshape(1, -1, 1), n_sample, axis=0)
-        with torch.no_grad:
+        with torch.no_grad():
             sample_res = model.sample(n_sample, max_length, file_to_sample, Xs=cond_x, ys=cond_y)
         sampled_formulas, _, _, _, _ = sample_res
         _, ress, _, _ = my_evaluate_formula.evaluate_file(file_to_sample, np.append(X_train, x), np.append(y_train, 0))
