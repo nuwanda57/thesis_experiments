@@ -49,3 +49,4 @@ def exp_generative_train(eval_xs, eval_ys, xs, ys, formula, train_file, val_file
                                          add_noise_every_n_steps=add_noise_every_n_steps, no_retrain=no_retrain,
                                          continue_training_on_train_dataset=continue_training_on_train_dataset,
                                          kl_coef=kl_coef)
+    return model
