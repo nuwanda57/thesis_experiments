@@ -10,8 +10,16 @@ def empirical_entropy(X):
     X: np.array [n_items, n_features]
     entropy: np.array [n_items]
     """
+
+    # pairwise_dist(X, X) - euclidean distance between rows of X
+    # torch.topk: indices of the 2 largest distances in each row: (n_items, 2)
     _, ind = torch.topk(-pairwise_dist(X, X), k=2, dim=1)
+    # X[ind[:, 1]]: for each row (item) take item which has second to largest
+    # # euclidean distance with this item (row)
+    # (X - X[ind[:, 1]]).pow(2).sum(1).sqrt(): eucledian distance between this and the one
+    # # that has second to largest distance with this: (n_items,)
     R_i = (X - X[ind[:, 1]]).pow(2).sum(1).sqrt()
+    # number of features
     d = X.shape[1]
     V = np.pi ** (d / 2) / scipy.special.gamma(d / 2 + 1)
     entropy = (len(R_i) * (R_i.pow(d))).log() + np.log(V) + 0.577
